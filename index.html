@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wojciech Hryniewicki</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@600&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;--bg:#0b0b0c;--cream:#e9e2cf;--dim:#8d8b85}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--cream);font:16px/1.5 system-ui,sans-serif;overflow-x:clip}
+.page{max-width:1240px;margin:auto;padding:clamp(28px,5vw,56px) max(5vw,16px)}
+.knobs{display:flex;justify-content:center;gap:clamp(12px,5vw,56px);margin-bottom:clamp(28px,5vw,48px)}
+.k{display:flex;flex-direction:column;align-items:center;gap:6px;width:110px}
+.k svg{overflow:visible;width:96px;height:96px;touch-action:none;cursor:grab;border-radius:50%}
+.k svg{outline:none;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
+.k span{font:600 14px/1 Oswald,Impact,sans-serif;letter-spacing:.08em}
+.scale text{font:500 9px system-ui,sans-serif;fill:var(--dim)}
+.cap{fill:url(#capg)}
+.ptr{stroke:#1a1a1a;stroke-width:4;stroke-linecap:round}
+.ring{fill:none;stroke:#2c2c30;stroke-width:3}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr));gap:22px}
+.frame{aspect-ratio:16/9;border-radius:6px;background:radial-gradient(circle at 30% 30%,#25252a,#0f0f11);display:grid;place-items:center}
+.frame{overflow:hidden}.frame iframe{display:block;width:100%;height:100%;border:0}
+@media(max-width:600px){.knobs{gap:8px}.k{width:96px}.k svg{width:84px;height:84px}}
+@media(forced-colors:active){
+  .cap{fill:Canvas;stroke:CanvasText;stroke-width:2}.ptr{stroke:Highlight}.ring{stroke:CanvasText}
+  .scale text{fill:CanvasText}
+  .frame{border:1px solid CanvasText}
+}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="knobs" id="knobs"></div>
+  <div class="grid" id="grid"></div>
+</div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <radialGradient id="capg" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#fbf6e7"/><stop offset=".7" stop-color="#d9d0b8"/><stop offset="1" stop-color="#9c9480"/></radialGradient>
+</defs></svg>
+
+<script>
+{
+/* Real channel playlists, built from the channel ID UCmLedzh0OHInbneBuKG7wUA.
+   UU = all uploads, UULF = long videos (songs), UUSH = Shorts. Newest video first. */
+const CH="mLedzh0OHInbneBuKG7wUA";
+const lists=["UU"+CH,"UULF"+CH,"UUSH"+CH];
+const MAX=6;
+const types=["All","Songs","Shorts"];
+const knobs=[
+  {id:"gain",label:"GAIN",v:2,steps:0},
+  {id:"type",label:"TYPE",v:0,steps:3},
+  {id:"vol",label:"VOLUME",v:10,steps:0}
+];
+const A0=-135,A1=135,S0=-50,S1=50;
+const get=id=>knobs.find(k=>k.id===id);
+const ang=k=>k.steps?S0+k.v/(k.steps-1)*(S1-S0):A0+k.v/10*(A1-A0);
+
+function scale(k){
+  const n=k.steps||11,out=[];
+  for(let i=0;i<n;i++){
+    const a=((k.steps?S0+i/(n-1)*(S1-S0):A0+i/(n-1)*(A1-A0))-90)*Math.PI/180,r=k.steps?45:44;
+    out.push(`<text x="${50+r*Math.cos(a)}" y="${50+r*Math.sin(a)+3}" text-anchor="middle">${k.steps?types[i].toUpperCase():i}</text>`);
+  }
+  return out.join('');
+}
+document.getElementById('knobs').innerHTML=knobs.map(k=>`
+ <div class="k">
+  <svg viewBox="0 0 100 100" id="k-${k.id}" tabindex="0" role="slider" aria-label="${k.label}">
+   <g class="scale">${scale(k)}</g>
+   <circle class="ring" cx="50" cy="50" r="33"/>
+   <g class="rot"><circle class="cap" cx="50" cy="50" r="28"/><line class="ptr" x1="50" y1="50" x2="50" y2="26"/></g>
+  </svg>
+  <span>${k.label}</span>
+ </div>`).join('');
+
+function render(){
+  const t=get('type').v;
+  const n=Math.max(1,Math.round(get('vol').v/10*MAX));
+  for(const k of knobs){
+    const s=document.getElementById('k-'+k.id);
+    s.querySelector('.rot').setAttribute('transform',`rotate(${ang(k)} 50 50)`);
+    s.setAttribute('aria-valuemin',0);s.setAttribute('aria-valuemax',k.steps?k.steps-1:10);
+    s.setAttribute('aria-valuenow',k.v);s.setAttribute('aria-valuetext',k.id==="type"?types[k.v]:String(k.v));
+  }
+  const key=t+"-"+n;
+  if(render.last===key)return;render.last=key;
+  const out=[];
+  for(let i=1;i<=n;i++)out.push(`<div class="frame"><iframe src="https://www.youtube-nocookie.com/embed/videoseries?list=${lists[t]}&index=${i}" title="Video ${i}" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>`);
+  document.getElementById('grid').innerHTML=out.join('');
+}
+function set(k,v){
+  k.v=k.steps?Math.max(0,Math.min(k.steps-1,Math.round(v))):Math.max(0,Math.min(10,Math.round(v*10)/10));
+  render();
+}
+for(const k of knobs){
+  const s=document.getElementById('k-'+k.id);let y0,v0,drag=false;
+  s.addEventListener('pointerdown',e=>{e.preventDefault();drag=true;y0=e.clientY;v0=k.v;s.setPointerCapture(e.pointerId)});
+  s.addEventListener('pointermove',e=>{if(drag)set(k,v0+(y0-e.clientY)/(k.steps?40:14))});
+  s.addEventListener('pointerup',()=>drag=false);s.addEventListener('pointercancel',()=>drag=false);
+  s.addEventListener('wheel',e=>{e.preventDefault();set(k,k.v+(e.deltaY<0?1:-1)*(k.steps?1:.5))},{passive:false});
+  s.addEventListener('keydown',e=>{const step=k.steps?1:.5;
+    if(e.key==="ArrowUp"||e.key==="ArrowRight"){e.preventDefault();set(k,k.v+step)}
+    if(e.key==="ArrowDown"||e.key==="ArrowLeft"){e.preventDefault();set(k,k.v-step)}});
+}
+render();
+}
+</script>
+</body>
+</html>
