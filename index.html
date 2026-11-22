@@ -13,10 +13,10 @@
 *{box-sizing:border-box;min-width:0}
 html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,sans-serif;overflow-x:clip}
 .page{padding:24px max(4vw,16px) 40px}
-.wrap{width:max(var(--w),min(100%,720px));margin:0 auto}
+.wrap{width:max(var(--w),min(100%,720px));max-width:1160px;margin:0 auto}
 
 /* Gain left, logo exactly centred, Type right */
-.knobs{display:grid;grid-template-columns:1fr auto 1fr;align-items:start;margin-bottom:24px}
+.knobs{display:grid;grid-template-columns:1fr auto 1fr;align-items:start;margin:0 auto 24px;max-width:560px}
 .knobs>.k:first-child{justify-self:start}
 .knobs>.k:last-child{justify-self:end}
 .k{display:flex;flex-direction:column;align-items:center;gap:8px}
@@ -36,7 +36,11 @@ html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui
 .frame{position:relative;overflow:hidden;background:#000;border-radius:8px;aspect-ratio:16/9;width:100%;
   box-shadow:0 0 0 1px var(--line),0 24px 60px -20px #000}
 .frame.short{aspect-ratio:9/16;width:min(100%,calc((100svh - 190px) * 9 / 16))}
-.frame>div,.frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.frame>div,.frame iframe{position:absolute;left:0;width:100%;border:0}
+/* Trick: the player is 3 times taller than the box. The video sits in the middle third,
+   while YouTube's title bar (top) and logo (bottom) fall outside the box and are cut off. */
+.frame>div,.frame iframe{top:-100%;height:300%;pointer-events:none}
+.frame.direct iframe{pointer-events:auto}
 .cover{position:absolute;inset:0;border:0;padding:0;margin:0;background:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .poster{position:absolute;inset:0;background:#000 center/cover no-repeat;display:grid;place-items:center}
 .poster::after{content:"";position:absolute;inset:0;background:linear-gradient(#0000 55%,#0006)}
@@ -49,7 +53,7 @@ html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui
 
 @media(max-width:600px){
   .page{padding:16px 12px 24px}
-  .knobs{margin-bottom:16px}
+  .knobs{margin-bottom:16px;max-width:none}
   .k svg{width:80px;height:80px}.k.wide svg{width:128px}
   .logo{width:72px;height:72px;margin-top:4px}
   /* Phone: video goes edge to edge */
@@ -143,7 +147,7 @@ function showPoster(on){
   cover.setAttribute('aria-label',on?'Play video':'Pause video');
 }
 function load(vid){
-  current=vid;playing=false;
+  current=vid;playing=false;frame.classList.remove('direct');
   frame.classList.toggle('short',!!vid.s);
   poster.style.backgroundImage=`url(https://i.ytimg.com/vi/${vid.id}/hqdefault.jpg)`;
   cover.classList.remove('hidden');showPoster(true);
@@ -155,15 +159,21 @@ cover.addEventListener('click',()=>{
   yt.playVideo();showPoster(false);
   /* If the phone refuses to start, hand the tap over to YouTube's own player */
   clearTimeout(fallback);
-  fallback=setTimeout(()=>{if(!playing)cover.classList.add('hidden')},1500);
+  fallback=setTimeout(()=>{if(!playing){cover.classList.add('hidden');frame.classList.add('direct')}},1500);
 });
+/* Stop just before the end, so YouTube's end screen and suggestions never appear */
+setInterval(()=>{
+  if(!ready||!playing)return;
+  const d=yt.getDuration(),t=yt.getCurrentTime();
+  if(d>0&&d-t<0.4){yt.pauseVideo();yt.seekTo(0,true);playing=false;showPoster(true)}
+},200);
 window.onYouTubeIframeAPIReady=()=>{
   yt=new YT.Player('player',{
     videoId:current?current.id:"",
     host:'https://www.youtube-nocookie.com',
-    playerVars:{controls:0,rel:0,iv_load_policy:3,playsinline:1,disablekb:1,fs:0,cc_load_policy:0},
+    playerVars:{controls:0,rel:0,iv_load_policy:3,playsinline:1,disablekb:1,fs:0,cc_load_policy:0,showinfo:0,modestbranding:1,autohide:1,origin:location.origin,widget_referrer:location.href},
     events:{
-      onReady:()=>{ready=true},
+      onReady:()=>{ready=true;yt.unMute()},
       onStateChange:e=>{
         if(e.data===1){playing=true;cover.classList.remove('hidden');showPoster(false)}
         if(e.data===2||e.data===0){playing=false;showPoster(true)}
