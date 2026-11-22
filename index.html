@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Wojciech Hryniewicki</title>
+<script>try{if(localStorage.getItem('wh-mode')==='light')document.documentElement.dataset.mode='light'}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@600&display=swap" rel="stylesheet">
 <style>
@@ -45,17 +46,17 @@ html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui
 .k svg{display:block;width:96px;height:96px;touch-action:none;cursor:grab;outline:none;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
 .k.wide svg{width:154px}
 .scale text{font:600 9px system-ui,sans-serif;fill:var(--scale);letter-spacing:.04em}
-.k.wide .scale text{font-size:9px;letter-spacing:.06em;transition:opacity .2s}
+.k.wide .scale text{letter-spacing:.06em;transition:opacity .2s}
 .scale text.off{opacity:.3}
 .cap{fill:var(--bg);stroke:var(--ink);stroke-width:1.6}
 .ptr{stroke:var(--ink);stroke-width:3;stroke-linecap:round}
 .ring{fill:none;stroke:var(--ink);stroke-width:2.5}
+.ticks line{stroke:var(--scale);stroke-width:1.5;stroke-linecap:round}
 .logo{display:block;width:96px;height:96px}
 .logo .ln{stroke:var(--logo);fill:none}
 
-/* Video: frameless. Shorts get the same height as a wide video, so nothing jumps */
-/* The stage keeps one fixed height for every video, so nothing moves when a knob turns.
-   Wide videos sit in its vertical centre, Shorts stand inside it. */
+/* Video: frameless. The stage keeps one fixed height for every video, so nothing moves when a knob turns.
+   Wide videos sit in its vertical centre, Shorts stand inside it at the same height. */
 .stage{display:flex;justify-content:center;align-items:center;
   height:calc(min(100vw - 32px,880px) * 9 / 16);height:calc(100cqw * 9 / 16)}
 .frame{position:relative;overflow:hidden;background:#000;border-radius:8px;aspect-ratio:16/9;width:100%;
@@ -68,7 +69,7 @@ html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui
 .frame.direct iframe{pointer-events:auto}
 .frame iframe#plain{top:0;height:100%;pointer-events:auto;z-index:2}
 .frame iframe#plain.hidden{display:none}
-.cover{position:absolute;inset:0;border:0;padding:0;margin:0;background:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.cover{position:absolute;inset:0;z-index:3;border:0;padding:0;margin:0;background:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .poster{position:absolute;inset:0;background:#000 center/cover no-repeat;display:grid;place-items:center}
 .poster::after{content:"";position:absolute;inset:0;background:linear-gradient(#0000 55%,#0006)}
 .poster .btn{position:relative;z-index:1;width:68px;height:68px;border-radius:50%;background:#0b0b0cb3;
@@ -76,8 +77,8 @@ html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui
 .poster .btn svg{margin-left:3px}
 .cover:hover .btn,.cover:focus-visible .btn{transform:scale(1.06);background:#0b0b0ce6}
 .cover:focus-visible{outline:2px solid var(--ink);outline-offset:-2px}
+.poster.paused{background:none!important}.poster.paused::after{display:none}
 .hidden{display:none}
-.cover{z-index:3}.poster.paused{background:none!important}.poster.paused::after{display:none}
 
 /* Watermark: the logo in the corner of every video */
 .wm{position:absolute;z-index:4;right:14px;bottom:48px;width:34px;height:34px;pointer-events:none;opacity:.9}
@@ -100,7 +101,6 @@ html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui
 .pp:focus-visible,.track:focus-visible{outline:2px solid #ece9e1;outline-offset:2px}
 .frame.plainmode .bar{display:none}
 
-
 /* Footer */
 footer{width:100%;max-width:880px;margin:48px auto 0;padding:24px 0 28px;border-top:1px solid var(--line)}
 .social{list-style:none;margin:0;padding:0;display:flex;justify-content:center;flex-wrap:wrap;gap:8px 36px}
@@ -114,25 +114,29 @@ footer{width:100%;max-width:880px;margin:48px auto 0;padding:24px 0 28px;border-
   .wrap{margin:0 auto}
   footer{margin-top:auto}
   .knobs{margin-bottom:20px;max-width:none;display:flex;justify-content:space-between}
-  .k svg{width:80px;height:80px}.k.wide svg{width:128px}
-  .logo{width:56px;height:56px;margin-top:12px}
+  .k svg{width:80px;height:80px}
+  .logo{width:46px;height:56px;margin-top:12px}
   .knobs>.left{gap:4px}
   .odbtn svg{width:46px;height:80px}
   .od>span,.lt>span,.k span{font-size:10px;letter-spacing:.06em}
-  .k.wide svg{width:118px}.knobs>.right{gap:0}.ltbtn svg{width:32px;height:80px}
+  .k.wide svg{width:118px}
+  .knobs>.right{gap:10px}
+  .ltbtn svg{width:32px;height:80px}
   /* Phone: video goes edge to edge */
   .stage{margin:0 -12px;height:min(58vh,calc(100vw * 1.05));height:min(58svh,calc(100cqw * 1.05))}
   .frame{border-radius:0;box-shadow:none}
   .frame.short{height:100%;border-radius:10px}
   .social{gap:4px 24px}
 }
-@media(max-width:380px){
-  .k svg{width:72px;height:72px}.k.wide svg{width:116px}
+@media(max-width:389px){
+  .k svg{width:72px;height:72px}
   .odbtn svg{width:42px;height:72px}
   .logo{width:46px;height:46px}
   .od>span,.lt>span{font-size:9.5px;letter-spacing:.03em}
-  .k.wide svg{width:104px}.ltbtn svg{width:30px;height:72px}
+  .k.wide svg{width:104px}
+  .ltbtn svg{width:30px;height:72px}
   .knobs>.left{gap:0}
+  .knobs>.right{gap:8px}
 }
 @media(max-width:340px){
   .k svg{width:62px;height:62px}.k.wide svg{width:92px}.logo{width:36px;height:36px}
@@ -142,7 +146,7 @@ footer{width:100%;max-width:880px;margin:48px auto 0;padding:24px 0 28px;border-
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 @media(forced-colors:active){
   .cap{fill:Canvas!important;stroke:CanvasText!important;stroke-width:2}.ptr{stroke:Highlight}.ring{stroke:CanvasText!important}
-  .scale text{fill:CanvasText}.scale text.off{fill:GrayText}.frame{border:1px solid CanvasText}
+  .scale text{fill:CanvasText}.ticks line{stroke:CanvasText!important}.scale text.off{fill:GrayText}.frame{border:1px solid CanvasText}
   .logo .ln{stroke:CanvasText!important}
   .poster .btn{border:2px solid CanvasText;background:Canvas}.poster .btn path{fill:CanvasText}
   .cover:focus-visible{outline-color:Highlight}
@@ -209,14 +213,14 @@ footer{width:100%;max-width:880px;margin:48px auto 0;padding:24px 0 28px;border-
    write that video like this instead: {id:"i6rgYLaGDbg", shape:"upright"}  or  shape:"wide"
    ========================================================================= */
 const LIBRARY=[
+  {label:"DRUMS",  name:"Drums",
+    clean:[],          /* coming soon: add drum videos here, lightest first */
+    overdrive:[]},
   {label:"KEYS",   name:"Keys",
     clean:["im13LzBOD_w","DEANSHDWww0","AG3WGAEKPGY","6VrBtL-pBQk"],
     overdrive:[]},
   {label:"GUITAR", name:"Guitar Only",
     clean:["74Fn6fPGEnE","quwbFH3pn8A"],
-    overdrive:[]},
-  {label:"DRUMS",  name:"Drums",
-    clean:[],          /* coming soon: add drum videos here, lightest first */
     overdrive:[]},
   {label:"SONGS",  name:"Full Songs",
     clean:["2iNbePz8Ao0","n-DhYip3wh8",{id:"i6rgYLaGDbg",shape:"upright"},"tCl8g3aSStY","ZwpYgKk2IPk","ggS8HsNWE3s","73ziziUBd6U"],
@@ -231,14 +235,16 @@ let od=false;
 const listOf=i=>od?types[i].overdrive:types[i].clean;
 const usable=i=>listOf(i).length>0;
 const knobs=[
-  {id:"gain",label:"GAIN",v:0,steps:0},
+  {id:"gain",label:"GAIN",v:0,steps:0},   /* v = which video in the list (0 = lightest) */
   {id:"type",label:"TYPE",v:0,steps:types.length}
 ];
 const A0=-135,A1=135;
 /* Type labels spread wider when there are more of them */
 const TA={2:[-40,40],3:[-55,0,55],4:[-80,-30,30,80],5:[-90,-48,0,48,90]}[types.length]||types.map((t,i)=>-90+i*180/(types.length-1));
 const get=id=>knobs.find(k=>k.id===id);
-const ang=k=>k.steps?TA[k.v]:A0+k.v/10*(A1-A0);
+/* Gain: the videos are spread evenly over the knob's turn, one tick mark each */
+const gainAng=(i,n)=>n>1?A0+i/(n-1)*(A1-A0):A0;
+const ang=k=>k.steps?TA[k.v]:gainAng(k.v,listOf(get('type').v).length);
 
 function scale(k){
   const n=k.steps||11,out=[];
@@ -253,7 +259,7 @@ const knobHtml=k=>`
  <div class="k${k.steps?' wide':''}">
   <svg viewBox="${k.steps?'-30 0 160 100':'0 0 100 100'}" id="k-${k.id}" tabindex="0" role="slider" aria-label="${k.label}">
    <g class="scale">${scale(k)}</g>
-   <circle class="ring" cx="50" cy="50" r="33"/>
+   <circle class="ring" cx="50" cy="50" r="33"/>${k.steps?'':'<g class="ticks"></g>'}
    <g class="rot"><circle class="cap" cx="50" cy="50" r="27"/><line class="ptr" x1="50" y1="50" x2="50" y2="27"/></g>
   </svg>
   <span>${k.label}</span>
@@ -306,12 +312,15 @@ function thumb(v){return `url(https://i.ytimg.com/vi/${v.id}/${upright(v)&&v.oar
 function setFill(f){fill.style.width=(f*100)+'%';track.setAttribute('aria-valuenow',Math.round(f*100))}
 /* Shape check: YouTube keeps an "original shape" thumbnail (oardefault) for upright videos.
    If it exists and is taller than wide, the video is upright. If it is missing or wide, the video is wide.
-   Until the check is done, the link type (/shorts/ or not) is used as a first guess. */
+   A shape set by hand in the library always wins. */
 function upright(v){return v.f!==undefined?v.f:!!v.up}
 for(const t of types)for(const v of [...t.clean,...t.overdrive]){
   const img=new Image();
   const done=()=>{if(v===current){frame.classList.toggle('short',v.up);poster.style.backgroundImage=thumb(v)}};
-  img.onload=()=>{v.oar=true;v.up=v.f!==undefined?v.f:img.naturalHeight>img.naturalWidth*1.1;done()};
+  img.onload=()=>{
+    /* YouTube answers a missing thumbnail with a small grey 120x90 picture: treat that as "no thumbnail" */
+    const real=!(img.naturalWidth===120&&img.naturalHeight===90);
+    v.oar=real;v.up=v.f!==undefined?v.f:real&&img.naturalHeight>img.naturalWidth*1.1;done()};
   img.onerror=()=>{v.up=v.f!==undefined?v.f:false;done()};
   img.src=`https://i.ytimg.com/vi/${v.id}/oardefault.jpg`;
 }
@@ -362,7 +371,6 @@ track.addEventListener('keydown',e=>{
   e.preventDefault();const t=Math.max(0,Math.min(d-1,yt.getCurrentTime()+step));yt.seekTo(t,true);setFill(t/d);
 });
 
-
 /* Stop just before the end, so YouTube's end screen and suggestions never appear */
 setInterval(()=>{
   if(!ready||!playing)return;
@@ -386,42 +394,56 @@ window.onYouTubeIframeAPIReady=()=>{
 };
 const s=document.createElement('script');s.src='https://www.youtube.com/iframe_api';document.head.appendChild(s);
 
+let lastN=0;
 function render(){
-  const list=listOf(get('type').v);
-  const i=Math.min(list.length-1,Math.floor(get('gain').v/10*list.length));
+  const list=listOf(get('type').v),n=list.length,g=get('gain');
+  /* When the list changes (Type or Overdrive), keep the knob at about the same place */
+  if(lastN&&lastN!==n)g.v=lastN>1?Math.round(g.v/(lastN-1)*(n-1)):0;
+  g.v=Math.max(0,Math.min(n-1,g.v));
+  if(lastN!==n){
+    lastN=n;
+    document.querySelector('#k-gain .ticks').innerHTML=list.map((v,j)=>{
+      const a=(gainAng(j,n)-90)*Math.PI/180;
+      return `<line x1="${50+36*Math.cos(a)}" y1="${50+36*Math.sin(a)}" x2="${50+39.5*Math.cos(a)}" y2="${50+39.5*Math.sin(a)}"/>`}).join('');
+  }
   for(const k of knobs){
     const el=document.getElementById('k-'+k.id);
     el.querySelector('.rot').setAttribute('transform',`rotate(${ang(k)} 50 50)`);
-    el.setAttribute('aria-valuemin',0);el.setAttribute('aria-valuemax',k.steps?k.steps-1:10);
+    el.setAttribute('aria-valuemin',0);el.setAttribute('aria-valuemax',k.steps?k.steps-1:n-1);
     el.setAttribute('aria-valuenow',k.v);
-    el.setAttribute('aria-valuetext',k.id==="type"?types[k.v].name+(od?", overdrive":""):`${k.v}, video ${i+1} of ${list.length}`);
+    el.setAttribute('aria-valuetext',k.id==="type"?types[k.v].name+(od?", overdrive":""):`video ${g.v+1} of ${n}`);
   }
   /* Type names without videos in this mode are dimmed, and the knob skips them */
   types.forEach((t,i)=>document.querySelector('#k-type .p'+i).classList.toggle('off',!usable(i)));
-  if(list[i]!==current)load(list[i]);
+  if(list[g.v]!==current)load(list[g.v]);
 }
-function set(k,v){
+/* Move a knob a number of steps from a starting point.
+   Gain: one step = one video. Type: one step = the next Type that has videos (empty ones are skipped). */
+function stepFrom(k,from,steps){
   if(k.steps){
-    let n=Math.max(0,Math.min(k.steps-1,Math.round(v)));
-    if(n!==k.v&&!usable(n)){
-      const dir=n>k.v?1:-1;let j=n;
-      while(j>=0&&j<k.steps&&!usable(j))j+=dir;
-      n=(j>=0&&j<k.steps)?j:k.v;
-    }
-    k.v=n;
-  }else k.v=Math.max(0,Math.min(10,Math.round(v*10)/10));
+    const U=types.map((t,i)=>i).filter(usable);
+    const p=U.indexOf(from);if(p<0)return U[0]??from;
+    k.v=U[Math.max(0,Math.min(U.length-1,p+steps))];
+  }else{
+    const n=listOf(get('type').v).length;
+    k.v=Math.max(0,Math.min(n-1,from+steps));
+  }
   render();
 }
+/* Drag distance for one step: Type 40px, Gain spreads about 160px over the whole list (at least 14px per video) */
+const stepPx=k=>{if(k.steps)return 40;const n=listOf(get('type').v).length;return n>1?Math.max(14,160/(n-1)):1e9};
 for(const k of knobs){
   const el=document.getElementById('k-'+k.id);let y0,v0,drag=false;
   el.addEventListener('pointerdown',e=>{e.preventDefault();drag=true;y0=e.clientY;v0=k.v;el.setPointerCapture(e.pointerId)});
-  el.addEventListener('pointermove',e=>{if(drag)set(k,v0+(y0-e.clientY)/(k.steps?40:14))});
+  el.addEventListener('pointermove',e=>{if(drag)stepFrom(k,v0,Math.round((y0-e.clientY)/stepPx(k)))});
   el.addEventListener('pointerup',()=>drag=false);el.addEventListener('pointercancel',()=>drag=false);
-  el.addEventListener('wheel',e=>{e.preventDefault();set(k,k.v+(e.deltaY<0?1:-1)*(k.steps?1:.5))},{passive:false});
-  el.addEventListener('keydown',e=>{const step=k.steps?1:.5;
-    if(e.key==="ArrowUp"||e.key==="ArrowRight"){e.preventDefault();set(k,k.v+step)}
-    if(e.key==="ArrowDown"||e.key==="ArrowLeft"){e.preventDefault();set(k,k.v-step)}});
+  el.addEventListener('wheel',e=>{e.preventDefault();stepFrom(k,k.v,e.deltaY<0?1:-1)},{passive:false});
+  el.addEventListener('keydown',e=>{
+    if(e.key==="ArrowUp"||e.key==="ArrowRight"){e.preventDefault();stepFrom(k,k.v,1)}
+    if(e.key==="ArrowDown"||e.key==="ArrowLeft"){e.preventDefault();stepFrom(k,k.v,-1)}});
 }
+/* Start on the first Type that has videos (in case a list is ever left empty) */
+{const ty=get('type');if(!usable(ty.v))ty.v=Math.max(0,types.findIndex((t,i)=>usable(i)))}
 render();
 }
 </script>
