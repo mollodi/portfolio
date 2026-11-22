@@ -59,13 +59,13 @@ html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui
 .ring{fill:none;stroke:var(--ink);stroke-width:2.5}
 .ticks line{stroke:var(--scale);stroke-width:1.5;stroke-linecap:round}
 /* Player controls: the logo, big, on top of the video. It fades away 1 second after the last touch while a video plays. */
-.ctrls{position:absolute;inset:0;z-index:6;display:flex;align-items:center;justify-content:center;pointer-events:none;
+.ctrls{position:absolute;inset:0;z-index:6;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:.8;
   background:radial-gradient(closest-side,#000a,#0000);transition:opacity .35s}
 .ctrls.hide{opacity:0}
 .ctrls.hide .z{pointer-events:none}
 .frame.plainmode .ctrls{display:none}
-.logo{position:relative;display:block;height:min(58%,230px);aspect-ratio:185/180;margin-bottom:7%}
-.frame.short .logo{height:min(42%,230px)}
+.logo{position:relative;display:block;height:min(52%,220px);aspect-ratio:185/180;transform:translateY(10%)}
+.frame.short .logo{height:min(40%,220px);transform:translateY(28%)}
 /* The logo is built from five lines and is also the player:
    first line = play/pause switch, crossbar = progress, last line = volume */
 .logo .ln{position:absolute;background:var(--logo)}
@@ -319,8 +319,13 @@ let yt=null,ready=false,playing=false,current=null,fallback=0;
 const logo=document.getElementById('logo'),lgPlay=document.getElementById('lgPlay'),lgFill=document.getElementById('lgFill'),lgProg=document.getElementById('lgProg'),lgSeek=document.getElementById('lgSeek'),lgVol=document.getElementById('lgVol'),lgVolZ=document.getElementById('lgVolZ');
 let started=false;
 /* on: the thumbnail covers the video (before playing and when paused), so YouTube's own buttons never show */
+let posterT=0;
 function showPoster(on){
-  poster.classList.toggle('hidden',!on);
+  /* The thumbnail is lifted only after the video has played for 0.7 s, so YouTube's own
+     play/pause symbols (shown at start, on pause and when switching) are never seen */
+  clearTimeout(posterT);
+  if(on)poster.classList.remove('hidden');
+  else posterT=setTimeout(()=>{if(playing)poster.classList.add('hidden')},700);
   cover.setAttribute('aria-label',on?'Play video':'Pause video');
   logo.classList.toggle('playing',!on);lgPlay.setAttribute('aria-label',on?'Play':'Pause');
   showCtrls();
@@ -374,8 +379,8 @@ function toggle(){
   if(!current)return;
   acted=true;
   if(!ready){plainPlayer();return}
-  if(playing){yt.pauseVideo();return}
-  yt.playVideo();showPoster(false);
+  if(playing){playing=false;showPoster(true);yt.pauseVideo();return}
+  yt.playVideo();
   /* If the phone refuses to start, hand the tap over to YouTube's own player */
   clearTimeout(fallback);
   fallback=setTimeout(()=>{const st=yt.getPlayerState?yt.getPlayerState():-1;if(!playing&&st!==3&&st!==1){cover.classList.add('hidden');frame.classList.add('direct','plainmode')}},4000);
@@ -495,29 +500,38 @@ function stepFrom(k,from,steps){
 /* Jump to the number or name nearest to where the knob's scale was tapped */
 function pickAt(k,el,pt){
   acted=true;
+  if(Math.hypot(pt.x-50,pt.y-50)<8)return;                 /* the very centre has no direction */
+  const a=Math.atan2(pt.x-50,50-pt.y)*180/Math.PI;          /* 0 at the top, clockwise */
   if(k.steps){
+    /* the name nearest to where the knob was tapped (names or knob body) */
     let best=-1,bd=1e9;
-    el.querySelectorAll('.scale text').forEach((t,i)=>{const b=t.getBBox(),d=Math.hypot(b.x+b.width/2-pt.x,b.y+b.height/2-pt.y);if(d<bd){bd=d;best=i}});
-    if(best>=0&&usable(best)){k.v=best;render()}   /* a dimmed name does nothing */
+    el.querySelectorAll('.scale text').forEach((t,i)=>{
+      const b=t.getBBox(),out=Math.hypot(pt.x-50,pt.y-50)>35;
+      const d=out?Math.hypot(b.x+b.width/2-pt.x,b.y+b.height/2-pt.y):Math.abs(a-TA[i]);
+      if(d<bd){bd=d;best=i}});
+    if(best>=0&&usable(best)){k.v=best;render()}            /* a dimmed name does nothing */
   }else{
     const n=listOf(get('type').v).length;if(n<2)return;
-    let a=Math.atan2(pt.x-50,50-pt.y)*180/Math.PI;          /* 0 at the top, clockwise */
-    a=Math.max(A0,Math.min(A1,a));
-    k.v=Math.round((a-A0)/(A1-A0)*(n-1));render();
+    k.v=Math.round((Math.max(A0,Math.min(A1,a))-A0)/(A1-A0)*(n-1));render();
   }
 }
 /* Drag distance for one step: Type 40px, Gain spreads about 160px over the whole list (at least 14px per video) */
 const stepPx=k=>{if(k.steps)return 40;const n=listOf(get('type').v).length;return n>1?Math.max(14,160/(n-1)):1e9};
 for(const k of knobs){
-  const el=document.getElementById('k-'+k.id);let y0,v0,drag=false;
+  /* Tap: the knob turns to the number or name you tapped (or to the side of the knob you tapped).
+     Drag up or down: the knob turns one step at a time. */
+  const el=document.getElementById('k-'+k.id);let x0,y0,v0,down=false,drag=false,pt0=null;
   el.addEventListener('pointerdown',e=>{
     e.preventDefault();el.focus({preventScroll:true});
-    /* A tap outside the knob itself (on the numbers or names) jumps straight there */
-    const pt=new DOMPoint(e.clientX,e.clientY).matrixTransform(el.getScreenCTM().inverse());
-    if(Math.hypot(pt.x-50,pt.y-50)>35){pickAt(k,el,pt);return}
-    drag=true;y0=e.clientY;v0=k.v;el.setPointerCapture(e.pointerId)});
-  el.addEventListener('pointermove',e=>{if(drag)stepFrom(k,v0,Math.round((y0-e.clientY)/stepPx(k)))});
-  el.addEventListener('pointerup',()=>drag=false);el.addEventListener('pointercancel',()=>drag=false);
+    down=true;drag=false;x0=e.clientX;y0=e.clientY;v0=k.v;
+    pt0=new DOMPoint(e.clientX,e.clientY).matrixTransform(el.getScreenCTM().inverse());
+    el.setPointerCapture(e.pointerId)});
+  el.addEventListener('pointermove',e=>{
+    if(!down)return;
+    if(!drag&&Math.hypot(e.clientX-x0,e.clientY-y0)>6)drag=true;
+    if(drag)stepFrom(k,v0,Math.round((y0-e.clientY)/stepPx(k)))});
+  el.addEventListener('pointerup',()=>{if(down&&!drag)pickAt(k,el,pt0);down=drag=false});
+  el.addEventListener('pointercancel',()=>{down=drag=false});
   el.addEventListener('wheel',e=>{e.preventDefault();stepFrom(k,k.v,e.deltaY<0?1:-1)},{passive:false});
   el.addEventListener('keydown',e=>{
     if(e.key==="ArrowUp"||e.key==="ArrowRight"){e.preventDefault();stepFrom(k,k.v,1)}
