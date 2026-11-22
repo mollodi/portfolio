@@ -98,12 +98,8 @@ html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui
 .frame iframe#plain{top:0;height:100%;pointer-events:auto;z-index:2}
 .frame iframe#plain.hidden{display:none}
 .cover{position:absolute;inset:0;z-index:3;border:0;padding:0;margin:0;background:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
-.poster{position:absolute;inset:0;background:#000 center/cover no-repeat;display:grid;place-items:center}
+.poster{position:absolute;inset:0;background:#000 center/cover no-repeat}
 .poster::after{content:"";position:absolute;inset:0;background:linear-gradient(#0000 55%,#0006)}
-.poster .btn{position:relative;z-index:1;width:68px;height:68px;border-radius:50%;background:#0b0b0cb3;
-  box-shadow:inset 0 0 0 1px #ffffff40;display:grid;place-items:center;transition:transform .15s,background .15s}
-.poster .btn svg{margin-left:3px}
-.cover:hover .btn,.cover:focus-visible .btn{transform:scale(1.06);background:#0b0b0ce6}
 .cover:focus-visible{outline:2px solid var(--ink);outline-offset:-2px}
 .poster.paused{background:none!important}.poster.paused::after{display:none}
 .hidden{display:none}
@@ -166,7 +162,6 @@ footer{width:100%;max-width:880px;margin:48px auto 0;padding:24px 0 28px;border-
   .logo .lbl{color:CanvasText}
   .logo .ln{forced-color-adjust:none;background:CanvasText!important}.logo .hfill{forced-color-adjust:none;background:Highlight}
   .logo .dot{forced-color-adjust:none;background:Canvas;box-shadow:inset 0 0 0 2px CanvasText}.logo.playing .dplay{background:Highlight;box-shadow:inset 0 0 0 2px Highlight}.logo .z:focus-visible{outline-color:Highlight}
-  .poster .btn{border:2px solid CanvasText;background:Canvas}.poster .btn path{fill:CanvasText}
   .cover:focus-visible{outline-color:Highlight}
   .odbtn .ol,.ltbtn .ol{stroke:ButtonText!important}.odbtn .lamp{stroke:ButtonText!important;fill:Canvas!important;filter:none!important}.odbtn.on .lamp{fill:Highlight!important;stroke:Highlight!important}
   .odbtn:focus-visible{outline-color:Highlight}
@@ -196,7 +191,7 @@ footer{width:100%;max-width:880px;margin:48px auto 0;padding:24px 0 28px;border-
       <div id="player"></div>
       <iframe id="plain" class="hidden" title="Video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
       <button class="cover" id="cover" aria-label="Play video">
-        <span class="poster" id="poster"><span class="btn"><svg width="26" height="26" viewBox="0 0 22 22" aria-hidden="true"><path d="M7 4l12 7-12 7z" fill="#fff"/></svg></span></span>
+        <span class="poster" id="poster"></span>
       </button>
       <svg class="wm" viewBox="100 80 185 180" aria-hidden="true"><g class="ln" stroke-width="6"><line x1="109.5" y1="84" x2="109.5" y2="256"/><line x1="192" y1="84" x2="192" y2="256"/><line x1="274" y1="84" x2="274" y2="256"/><line x1="151" y1="167" x2="151" y2="256"/><line x1="148" y1="169.5" x2="233.5" y2="169.5" stroke-width="5"/></g></svg>
     </div>
@@ -296,6 +291,7 @@ const odBtn=document.getElementById('odBtn');
 /* Overdrive: if the Type in use has no videos for the new mode, the Type knob turns by itself,
    to SONGS when it can, otherwise to the first Type that has videos */
 odBtn.addEventListener('click',()=>{
+  acted=true;
   od=!od;
   const ty=get('type');
   if(!usable(ty.v)){
@@ -346,13 +342,18 @@ const plain=document.getElementById('plain');
 let apiFailed=false;
 /* If YouTube's player script never loads, show every video with the normal player */
 setTimeout(()=>{if(!ready){apiFailed=true;plainPlayer()}},6000);
-function plainPlayer(){
+function plainPlayer(auto){
   if(!current)return;
-  plain.src=`https://www.youtube.com/embed/${current.id}?rel=0&playsinline=1`;
+  plain.src=`https://www.youtube.com/embed/${current.id}?rel=0&playsinline=1${auto?'&autoplay=1':''}`;
   plain.classList.remove('hidden');cover.classList.add('hidden');frame.classList.add('plainmode');
 }
+/* Autoplay: once the visitor has used a control, a new video starts by itself
+   when the knob comes to rest (so turning through several videos doesn't start each one) */
+let acted=false,autoT=0;
 function load(vid){
   current=vid;playing=false;started=false;setFill(0);frame.classList.remove('direct','plainmode');
+  clearTimeout(autoT);
+  if(acted)autoT=setTimeout(()=>{if(current===vid){if(ready&&!apiFailed)yt.playVideo();else if(apiFailed)plainPlayer(true)}},600);
   plain.classList.add('hidden');plain.removeAttribute('src');
   if(apiFailed){frame.classList.toggle('short',upright(vid));plainPlayer();return}
   frame.classList.toggle('short',upright(vid));
@@ -362,6 +363,7 @@ function load(vid){
 }
 function toggle(){
   if(!current)return;
+  acted=true;
   if(!ready){plainPlayer();return}
   if(playing){yt.pauseVideo();return}
   yt.playVideo();showPoster(false);
@@ -458,6 +460,7 @@ function render(){
 /* Move a knob a number of steps from a starting point.
    Gain: one step = one video. Type: one step = the next Type that has videos (empty ones are skipped). */
 function stepFrom(k,from,steps){
+  acted=true;
   if(k.steps){
     const U=types.map((t,i)=>i).filter(usable);
     const p=U.indexOf(from);if(p<0)return U[0]??from;
@@ -470,6 +473,7 @@ function stepFrom(k,from,steps){
 }
 /* Jump to the number or name nearest to where the knob's scale was tapped */
 function pickAt(k,el,pt){
+  acted=true;
   if(k.steps){
     let best=-1,bd=1e9;
     el.querySelectorAll('.scale text').forEach((t,i)=>{const b=t.getBBox(),d=Math.hypot(b.x+b.width/2-pt.x,b.y+b.height/2-pt.y);if(d<bd){bd=d;best=i}});
