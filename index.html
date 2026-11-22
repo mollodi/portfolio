@@ -10,16 +10,16 @@
 <style>
 /* Dark, tidy amp face: one column, knobs and logo on one line, video below at the same width */
 :root{color-scheme:dark;--bg:#0b0b0c;--ink:#f1efe9;--dim:#8f8c85;--scale:#bdb9b0;--line:#1d1d20;--logo:linear-gradient(#c00000,#5a0000 72%,#4a0000);--hot:#ff3b30;
-  --w:min(100%,880px,calc((100svh - 385px) * 16 / 9))}
-@supports not (height:1svh){:root{--w:min(100%,880px,calc((100vh - 385px) * 16 / 9))}}
+  --w:min(100%,880px,calc((100svh - 314px) * 16 / 9))}
+@supports not (height:1svh){:root{--w:min(100%,880px,calc((100vh - 314px) * 16 / 9))}}
 /* Light version: warm grey page, black outline controls. The video, and the logo controls on it, stay dark. */
 :root[data-mode=light]{color-scheme:light;--bg:#d8d5cc;--ink:#111;--dim:#46433d;--scale:#222;--line:#b9b5ab}
 :root[data-mode=light] .frame{box-shadow:0 0 0 1px #0000001a,0 18px 40px -22px #0007}
 :root[data-mode=light] .odbtn.on .lamp{fill:#c40000;stroke:#c40000;filter:none}
 *{box-sizing:border-box;min-width:0}
 html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,sans-serif;overflow-x:clip}
-.page{min-height:100vh;min-height:100svh;display:flex;flex-direction:column;padding:32px max(4vw,16px) 0}
-.wrap{width:max(var(--w),min(100%,620px));margin:auto;container-type:inline-size}
+.page{min-height:100vh;min-height:100svh;display:flex;flex-direction:column;justify-content:center;padding:24px max(4vw,16px)}
+.wrap{width:max(var(--w),min(100%,620px));margin:0 auto;container-type:inline-size}
 
 /* Gain and Overdrive left, small logo in the middle, Light and Type right */
 .knobs{display:grid;grid-template-columns:1fr auto 1fr;align-items:start;margin:0 auto 24px;max-width:600px}
@@ -124,17 +124,19 @@ html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui
 
 
 /* Footer */
-footer{width:100%;max-width:880px;margin:48px auto 0;padding:24px 0 28px;border-top:1px solid var(--line)}
-.social{list-style:none;margin:0;padding:0;display:flex;justify-content:center;flex-wrap:wrap;gap:8px 36px}
-.social a{display:inline-flex;align-items:center;min-height:44px;padding:0 4px;color:var(--dim);text-decoration:none;
-  font:600 13px/1 Oswald,Impact,sans-serif;letter-spacing:.16em;transition:color .15s}
+/* Footer: small, the same distance under the video as the controls are above it */
+footer{width:max(var(--w),min(100%,620px));margin:24px auto 0;padding:8px 0 10px;border-top:1px solid var(--line)}
+.social{list-style:none;margin:0;padding:0;display:flex;justify-content:center;flex-wrap:wrap;gap:4px 28px}
+.social a{display:inline-flex;align-items:center;min-height:36px;padding:0 4px;color:var(--dim);text-decoration:none;
+  font:600 11px/1 Oswald,Impact,sans-serif;letter-spacing:.16em;transition:color .15s}
 .social a:hover,.social a:focus-visible{color:var(--ink)}
 .social a:focus-visible{outline:2px solid var(--ink);outline-offset:2px;border-radius:2px}
 
 @media(max-width:700px){
-  .page{padding:20px 12px 0}
-  .wrap{margin:0 auto}
-  footer{margin-top:auto}
+  .page{padding:20px 12px 0;height:100vh;height:100svh}
+  /* Phone: the video area takes the free space between the controls and the footer, and sits in its middle */
+  .wrap{margin:0 auto;flex:1;display:flex;flex-direction:column;width:100%}
+  footer{margin-top:0;width:100%}
   .knobs{margin-bottom:16px;max-width:none;display:flex;justify-content:space-between}
   .badge{width:46px;height:56px;margin-top:12px}
   .logo .lbl{font-size:10px;letter-spacing:.08em}
@@ -144,11 +146,11 @@ footer{width:100%;max-width:880px;margin:48px auto 0;padding:24px 0 28px;border-
   .od>span,.lt>span,.k span{font-size:10px;letter-spacing:.06em}
   .ltbtn svg{width:32px;height:80px}
   .k.wide svg{width:118px}
-  /* Phone: video goes edge to edge. Wide videos sit at the top of the video area, so the gap under the logo is the same as above it */
-  .stage{align-items:flex-start;margin:0 -12px;height:min(58vh,calc(100vw * 1.05));height:min(58svh,calc(100cqw * 1.05))}
+  /* Video edge to edge; the area is up to 58% of the screen height, wide videos centred in it, Shorts fill its height */
+  .stage{flex:0 1 58vh;flex-basis:58svh;height:auto;min-height:calc(100vw * 9 / 16);margin:auto -12px;align-items:center}
   .frame{border-radius:0;box-shadow:none}
   .frame.short{height:100%;border-radius:10px}
-  .social{gap:4px 24px}
+  .social{gap:0 20px}.social a{font-size:11px;letter-spacing:.1em}
 }
 @media(max-width:389px){
   .k svg{width:72px;height:72px}
@@ -518,18 +520,22 @@ function pickAt(k,el,pt){
 /* Drag distance for one step: Type 40px, Gain spreads about 160px over the whole list (at least 14px per video) */
 const stepPx=k=>{if(k.steps)return 40;const n=listOf(get('type').v).length;return n>1?Math.max(14,160/(n-1)):1e9};
 for(const k of knobs){
-  /* Tap: the knob turns to the number or name you tapped (or to the side of the knob you tapped).
-     Drag up or down: the knob turns one step at a time. */
-  const el=document.getElementById('k-'+k.id);let x0,y0,v0,down=false,drag=false,pt0=null;
+  /* Like a real knob:
+     - tap anywhere: the knob turns to that spot (or to the number or name you tapped)
+     - grab the edge and drag around: the pointer follows your finger
+     - grab the middle and drag up or down: one step at a time */
+  const el=document.getElementById('k-'+k.id);let x0,y0,v0,down=false,drag=false,round=false,pt0=null;
+  const svgPt=e=>new DOMPoint(e.clientX,e.clientY).matrixTransform(el.getScreenCTM().inverse());
   el.addEventListener('pointerdown',e=>{
     e.preventDefault();el.focus({preventScroll:true});
-    down=true;drag=false;x0=e.clientX;y0=e.clientY;v0=k.v;
-    pt0=new DOMPoint(e.clientX,e.clientY).matrixTransform(el.getScreenCTM().inverse());
+    down=true;drag=false;x0=e.clientX;y0=e.clientY;v0=k.v;pt0=svgPt(e);
+    round=Math.hypot(pt0.x-50,pt0.y-50)>18;
     el.setPointerCapture(e.pointerId)});
   el.addEventListener('pointermove',e=>{
     if(!down)return;
     if(!drag&&Math.hypot(e.clientX-x0,e.clientY-y0)>6)drag=true;
-    if(drag)stepFrom(k,v0,Math.round((y0-e.clientY)/stepPx(k)))});
+    if(!drag)return;
+    if(round)pickAt(k,el,svgPt(e));else stepFrom(k,v0,Math.round((y0-e.clientY)/stepPx(k)))});
   el.addEventListener('pointerup',()=>{if(down&&!drag)pickAt(k,el,pt0);down=drag=false});
   el.addEventListener('pointercancel',()=>{down=drag=false});
   el.addEventListener('wheel',e=>{e.preventDefault();stepFrom(k,k.v,e.deltaY<0?1:-1)},{passive:false});
