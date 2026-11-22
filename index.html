@@ -9,11 +9,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@600&display=swap" rel="stylesheet">
 <style>
 /* Dark, tidy amp face: one column, knobs and logo on one line, video below at the same width */
-:root{color-scheme:dark;--bg:#0b0b0c;--ink:#f1efe9;--dim:#8f8c85;--scale:#bdb9b0;--line:#1d1d20;--logo:url(#logog);
+:root{color-scheme:dark;--bg:#0b0b0c;--ink:#f1efe9;--dim:#8f8c85;--scale:#bdb9b0;--line:#1d1d20;--logo:linear-gradient(#990000,#3a0000 72%,#370000);--hot:#ff3b30;
   --w:min(100%,880px,calc((100svh - 385px) * 16 / 9))}
 @supports not (height:1svh){:root{--w:min(100%,880px,calc((100vh - 385px) * 16 / 9))}}
 /* Light version (style A): off-white page, black outline controls, black logo. Video area stays black. */
-:root[data-mode=light]{color-scheme:light;--bg:#f4f3ef;--ink:#111;--dim:#55524b;--scale:#333;--line:#d6d3ca;--logo:#111}
+:root[data-mode=light]{color-scheme:light;--bg:#d8d5cc;--ink:#111;--dim:#46433d;--scale:#222;--line:#b9b5ab;--logo:linear-gradient(#111,#111);--hot:#c40000}
 :root[data-mode=light] .frame{box-shadow:0 0 0 1px #0000001a,0 18px 40px -22px #0007}
 *{box-sizing:border-box;min-width:0}
 html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,sans-serif;overflow-x:clip}
@@ -45,15 +45,34 @@ html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui
 .knobs>.right{justify-self:end;display:flex;align-items:flex-start;gap:10px}
 .k svg{display:block;width:96px;height:96px;touch-action:none;cursor:grab;outline:none;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
 .k.wide svg{width:154px}
-.scale text{font:600 9px system-ui,sans-serif;fill:var(--scale);letter-spacing:.04em}
+.scale text{font:600 9px system-ui,sans-serif;fill:var(--scale);letter-spacing:.04em;cursor:pointer}
+.scale text.off{cursor:default}
 .k.wide .scale text{letter-spacing:.06em;transition:opacity .2s}
 .scale text.off{opacity:.3}
 .cap{fill:var(--bg);stroke:var(--ink);stroke-width:1.6}
 .ptr{stroke:var(--ink);stroke-width:3;stroke-linecap:round}
 .ring{fill:none;stroke:var(--ink);stroke-width:2.5}
 .ticks line{stroke:var(--scale);stroke-width:1.5;stroke-linecap:round}
-.logo{display:block;width:96px;height:96px}
-.logo .ln{stroke:var(--logo);fill:none}
+.logo{position:relative;display:block;width:96px;aspect-ratio:185/180;margin-top:1px}
+/* The logo is built from five lines and is also the player:
+   first line = play/pause switch, crossbar = progress, last line = volume */
+.logo .ln{position:absolute;background:var(--logo)}
+.logo .t{top:2.22%;height:95.56%;width:3.24%;background-size:100% 100%}
+.logo .l1{left:3.51%}.logo .l3{left:48.11%}.logo .l4{left:92.43%}
+.logo .l2{left:25.95%;top:48.33%;height:49.44%;width:3.24%;background-size:100% 193.3%;background-position:0 100%}
+.logo .h{left:25.95%;top:48.33%;width:46.22%;height:2.78%;background-size:100% 3440%;background-position:0 49.7%}
+.logo .hfill{position:absolute;left:25.95%;top:48.33%;height:2.78%;width:0;background:var(--hot);pointer-events:none}
+.logo .dot{position:absolute;width:11%;aspect-ratio:1;border-radius:50%;transform:translate(-50%,-50%);pointer-events:none;
+  background:var(--bg);box-shadow:inset 0 0 0 2px var(--ink);transition:top .2s}
+.logo .dplay{left:5.13%;top:88.9%}
+.logo.playing .dplay{top:11.1%;background:var(--hot);box-shadow:inset 0 0 0 2px var(--hot)}
+.logo .dprog{top:49.72%;left:25.95%;transition:none}
+.logo .dvol{left:94.05%;top:97.8%;transition:none}
+.logo .z{position:absolute;z-index:2;border:0;padding:0;margin:0;background:none;cursor:pointer;touch-action:none;-webkit-tap-highlight-color:transparent}
+.logo .zplay{left:-4%;width:18%;top:0;height:100%}
+.logo .zprog{left:20%;width:58%;top:37%;height:26%}
+.logo .zvol{left:84%;width:20%;top:0;height:100%;cursor:ns-resize}
+.logo .z:focus-visible{outline:2px solid var(--ink);outline-offset:1px;border-radius:4px}
 
 /* Video: frameless. The stage keeps one fixed height for every video, so nothing moves when a knob turns.
    Wide videos sit in its vertical centre, Shorts stand inside it at the same height. */
@@ -115,7 +134,7 @@ footer{width:100%;max-width:880px;margin:48px auto 0;padding:24px 0 28px;border-
   footer{margin-top:auto}
   .knobs{margin-bottom:20px;max-width:none;display:flex;justify-content:space-between}
   .k svg{width:80px;height:80px}
-  .logo{width:46px;height:56px;margin-top:12px}
+  .logo{width:46px;margin-top:16px}
   .knobs>.left{gap:4px}
   .odbtn svg{width:46px;height:80px}
   .od>span,.lt>span,.k span{font-size:10px;letter-spacing:.06em}
@@ -131,7 +150,7 @@ footer{width:100%;max-width:880px;margin:48px auto 0;padding:24px 0 28px;border-
 @media(max-width:389px){
   .k svg{width:72px;height:72px}
   .odbtn svg{width:42px;height:72px}
-  .logo{width:46px;height:46px}
+  .logo{width:46px}
   .od>span,.lt>span{font-size:9.5px;letter-spacing:.03em}
   .k.wide svg{width:104px}
   .ltbtn svg{width:30px;height:72px}
@@ -139,7 +158,7 @@ footer{width:100%;max-width:880px;margin:48px auto 0;padding:24px 0 28px;border-
   .knobs>.right{gap:8px}
 }
 @media(max-width:340px){
-  .k svg{width:62px;height:62px}.k.wide svg{width:92px}.logo{width:36px;height:36px}
+  .k svg{width:62px;height:62px}.k.wide svg{width:92px}.logo{width:36px}
   .odbtn svg{width:36px;height:62px}.ltbtn svg{width:26px;height:62px}
   .od>span,.lt>span,.k span{font-size:9px}
 }
@@ -147,7 +166,8 @@ footer{width:100%;max-width:880px;margin:48px auto 0;padding:24px 0 28px;border-
 @media(forced-colors:active){
   .cap{fill:Canvas!important;stroke:CanvasText!important;stroke-width:2}.ptr{stroke:Highlight}.ring{stroke:CanvasText!important}
   .scale text{fill:CanvasText}.ticks line{stroke:CanvasText!important}.scale text.off{fill:GrayText}.frame{border:1px solid CanvasText}
-  .logo .ln{stroke:CanvasText!important}
+  .logo .ln{forced-color-adjust:none;background:CanvasText!important}.logo .hfill{forced-color-adjust:none;background:Highlight}
+  .logo .dot{forced-color-adjust:none;background:Canvas;box-shadow:inset 0 0 0 2px CanvasText}.logo.playing .dplay{background:Highlight;box-shadow:inset 0 0 0 2px Highlight}.logo .z:focus-visible{outline-color:Highlight}
   .poster .btn{border:2px solid CanvasText;background:Canvas}.poster .btn path{fill:CanvasText}
   .cover:focus-visible{outline-color:Highlight}
   .odbtn .ol,.ltbtn .ol{stroke:ButtonText!important}.odbtn .lamp{stroke:ButtonText!important;fill:Canvas!important;filter:none!important}.odbtn.on .lamp{fill:Highlight!important;stroke:Highlight!important}
@@ -163,15 +183,14 @@ footer{width:100%;max-width:880px;margin:48px auto 0;padding:24px 0 28px;border-
 <div class="page"><div class="wrap">
   <div class="knobs" id="knobs"></div>
   <template id="logoTpl">
-  <svg class="logo" viewBox="100 80 185 180" role="img" aria-label="Wojciech Hryniewicki logo">
-    <g class="ln" stroke-width="6" stroke-linecap="butt">
-      <line x1="109.5" y1="84" x2="109.5" y2="256"/>
-      <line x1="192" y1="84" x2="192" y2="256"/>
-      <line x1="274" y1="84" x2="274" y2="256"/>
-      <line x1="151" y1="167" x2="151" y2="256"/>
-      <line x1="148" y1="169.5" x2="233.5" y2="169.5" stroke-width="5"/>
-    </g>
-  </svg>
+  <div class="logo" id="logo" role="group" aria-label="Wojciech Hryniewicki logo and player">
+    <span class="ln t l1"></span><span class="ln l2"></span><span class="ln t l3"></span><span class="ln t l4"></span><span class="ln h"></span>
+    <span class="hfill" id="lgFill"></span>
+    <span class="dot dplay"></span><span class="dot dprog" id="lgProg"></span><span class="dot dvol" id="lgVol"></span>
+    <button class="z zplay" id="lgPlay" aria-label="Play"></button>
+    <span class="z zprog" id="lgSeek" tabindex="0" role="slider" aria-label="Video position" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></span>
+    <span class="z zvol" id="lgVolZ" tabindex="0" role="slider" aria-label="Volume" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"></span>
+  </div>
   </template>
   <div class="stage">
     <div class="frame" id="frame">
@@ -296,6 +315,7 @@ odBtn.addEventListener('click',()=>{
 const frame=document.getElementById('frame'),cover=document.getElementById('cover'),poster=document.getElementById('poster');
 let yt=null,ready=false,playing=false,current=null,fallback=0;
 
+const logo=document.getElementById('logo'),lgPlay=document.getElementById('lgPlay'),lgFill=document.getElementById('lgFill'),lgProg=document.getElementById('lgProg'),lgSeek=document.getElementById('lgSeek'),lgVol=document.getElementById('lgVol'),lgVolZ=document.getElementById('lgVolZ');
 const pp=document.getElementById('pp'),ppIcon=document.getElementById('ppIcon'),track=document.getElementById('track'),fill=document.getElementById('fill');
 const PLAY="M6 3l14 8-14 8z",PAUSE="M5 3h4v16H5zM13 3h4v16h-4z";
 let started=false;
@@ -305,11 +325,15 @@ function showPoster(on){
   poster.classList.toggle('paused',on&&started);
   cover.setAttribute('aria-label',on?'Play video':'Pause video');
   ppIcon.setAttribute('d',on?PLAY:PAUSE);frame.classList.toggle('isplaying',!on);pp.setAttribute('aria-label',on?'Play':'Pause');
+  logo.classList.toggle('playing',!on);lgPlay.setAttribute('aria-label',on?'Play':'Pause');
 }
 /* Upright videos use the upright thumbnail when YouTube has one. If not, the normal thumbnail is used:
    its upright picture sits in the middle, and the box crops away the black sides. */
 function thumb(v){return `url(https://i.ytimg.com/vi/${v.id}/${upright(v)&&v.oar?'oardefault':'hqdefault'}.jpg)`}
-function setFill(f){fill.style.width=(f*100)+'%';track.setAttribute('aria-valuenow',Math.round(f*100))}
+function setFill(f){
+  fill.style.width=(f*100)+'%';track.setAttribute('aria-valuenow',Math.round(f*100));
+  lgFill.style.width=(f*46.22)+'%';lgProg.style.left=(25.95+f*46.22)+'%';lgSeek.setAttribute('aria-valuenow',Math.round(f*100));
+}
 /* Shape check: YouTube keeps an "original shape" thumbnail (oardefault) for upright videos.
    If it exists and is taller than wide, the video is upright. If it is missing or wide, the video is wide.
    A shape set by hand in the library always wins. */
@@ -357,19 +381,46 @@ cover.addEventListener('click',toggle);pp.addEventListener('click',toggle);
 
 /* Progress bar: tap or drag to jump, arrow keys move 5 seconds */
 let dragging=false;
-function seekAt(x){
-  if(!ready)return;const r=track.getBoundingClientRect(),d=yt.getDuration();if(!(d>0))return;
+function seekAt(x,bar=track){
+  if(!ready)return;const r=bar.getBoundingClientRect(),d=yt.getDuration();if(!(d>0))return;
   const f=Math.max(0,Math.min(1,(x-r.left)/r.width));setFill(f);yt.seekTo(f*d,true);
 }
 track.addEventListener('pointerdown',e=>{e.preventDefault();dragging=true;track.classList.add('drag');track.setPointerCapture(e.pointerId);seekAt(e.clientX)});
 track.addEventListener('pointermove',e=>{if(dragging)seekAt(e.clientX)});
 const endDrag=()=>{dragging=false;track.classList.remove('drag')};
 track.addEventListener('pointerup',endDrag);track.addEventListener('pointercancel',endDrag);
-track.addEventListener('keydown',e=>{
+function seekKey(e){
   if(!ready)return;const d=yt.getDuration();if(!(d>0))return;
   const step=e.key==="ArrowRight"?5:e.key==="ArrowLeft"?-5:0;if(!step)return;
   e.preventDefault();const t=Math.max(0,Math.min(d-1,yt.getCurrentTime()+step));yt.seekTo(t,true);setFill(t/d);
-});
+}
+track.addEventListener('keydown',seekKey);
+
+/* Logo player: first line plays and pauses, crossbar shows and moves the position, last line sets the volume */
+lgPlay.addEventListener('click',toggle);
+const hBar=logo.querySelector('.h'),vBar=logo.querySelector('.l4');
+let lgDrag=false;
+lgSeek.addEventListener('pointerdown',e=>{e.preventDefault();lgDrag=dragging=true;lgSeek.setPointerCapture(e.pointerId);seekAt(e.clientX,hBar)});
+lgSeek.addEventListener('pointermove',e=>{if(lgDrag)seekAt(e.clientX,hBar)});
+const lgEnd=()=>{lgDrag=dragging=false};
+lgSeek.addEventListener('pointerup',lgEnd);lgSeek.addEventListener('pointercancel',lgEnd);
+lgSeek.addEventListener('keydown',seekKey);
+let vol=100;
+function setVol(v){
+  vol=Math.round(Math.max(0,Math.min(100,v)));
+  lgVol.style.top=((256-vol/100*172-80)/180*100)+'%';
+  lgVolZ.setAttribute('aria-valuenow',vol);
+  if(ready){yt.setVolume(vol);vol?yt.unMute():yt.mute()}
+}
+const volAt=y=>{const r=vBar.getBoundingClientRect();setVol((r.bottom-y)/r.height*100)};
+let vDrag=false;
+lgVolZ.addEventListener('pointerdown',e=>{e.preventDefault();vDrag=true;lgVolZ.setPointerCapture(e.pointerId);volAt(e.clientY)});
+lgVolZ.addEventListener('pointermove',e=>{if(vDrag)volAt(e.clientY)});
+lgVolZ.addEventListener('pointerup',()=>vDrag=false);lgVolZ.addEventListener('pointercancel',()=>vDrag=false);
+lgVolZ.addEventListener('keydown',e=>{
+  if(e.key==="ArrowUp"||e.key==="ArrowRight"){e.preventDefault();setVol(vol+10)}
+  if(e.key==="ArrowDown"||e.key==="ArrowLeft"){e.preventDefault();setVol(vol-10)}});
+lgVolZ.addEventListener('wheel',e=>{e.preventDefault();setVol(vol+(e.deltaY<0?5:-5))},{passive:false});
 
 /* Stop just before the end, so YouTube's end screen and suggestions never appear */
 setInterval(()=>{
@@ -383,7 +434,7 @@ window.onYouTubeIframeAPIReady=()=>{
     videoId:current?current.id:"",
     playerVars:{controls:0,rel:0,iv_load_policy:3,playsinline:1,disablekb:1,fs:0,cc_load_policy:0},
     events:{
-      onReady:()=>{ready=true;yt.unMute();if(current)yt.cueVideoById(current.id)},
+      onReady:()=>{ready=true;setVol(vol);if(current)yt.cueVideoById(current.id)},
       onError:()=>plainPlayer(),
       onStateChange:e=>{
         if(e.data===1){playing=true;started=true;cover.classList.remove('hidden');showPoster(false)}
@@ -430,11 +481,29 @@ function stepFrom(k,from,steps){
   }
   render();
 }
+/* Jump to the number or name nearest to where the knob's scale was tapped */
+function pickAt(k,el,pt){
+  if(k.steps){
+    let best=-1,bd=1e9;
+    el.querySelectorAll('.scale text').forEach((t,i)=>{const b=t.getBBox(),d=Math.hypot(b.x+b.width/2-pt.x,b.y+b.height/2-pt.y);if(d<bd){bd=d;best=i}});
+    if(best>=0&&usable(best)){k.v=best;render()}   /* a dimmed name does nothing */
+  }else{
+    const n=listOf(get('type').v).length;if(n<2)return;
+    let a=Math.atan2(pt.x-50,50-pt.y)*180/Math.PI;          /* 0 at the top, clockwise */
+    a=Math.max(A0,Math.min(A1,a));
+    k.v=Math.round((a-A0)/(A1-A0)*(n-1));render();
+  }
+}
 /* Drag distance for one step: Type 40px, Gain spreads about 160px over the whole list (at least 14px per video) */
 const stepPx=k=>{if(k.steps)return 40;const n=listOf(get('type').v).length;return n>1?Math.max(14,160/(n-1)):1e9};
 for(const k of knobs){
   const el=document.getElementById('k-'+k.id);let y0,v0,drag=false;
-  el.addEventListener('pointerdown',e=>{e.preventDefault();drag=true;y0=e.clientY;v0=k.v;el.setPointerCapture(e.pointerId)});
+  el.addEventListener('pointerdown',e=>{
+    e.preventDefault();el.focus({preventScroll:true});
+    /* A tap outside the knob itself (on the numbers or names) jumps straight there */
+    const pt=new DOMPoint(e.clientX,e.clientY).matrixTransform(el.getScreenCTM().inverse());
+    if(Math.hypot(pt.x-50,pt.y-50)>35){pickAt(k,el,pt);return}
+    drag=true;y0=e.clientY;v0=k.v;el.setPointerCapture(e.pointerId)});
   el.addEventListener('pointermove',e=>{if(drag)stepFrom(k,v0,Math.round((y0-e.clientY)/stepPx(k)))});
   el.addEventListener('pointerup',()=>drag=false);el.addEventListener('pointercancel',()=>drag=false);
   el.addEventListener('wheel',e=>{e.preventDefault();stepFrom(k,k.v,e.deltaY<0?1:-1)},{passive:false});
