@@ -100,25 +100,11 @@ html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui
 .hidden{display:none}
 
 /* Watermark: the logo in the corner of every video */
-.wm{position:absolute;z-index:4;right:14px;bottom:48px;width:34px;height:34px;pointer-events:none;opacity:.9}
+.wm{position:absolute;z-index:4;right:14px;bottom:14px;width:34px;height:34px;pointer-events:none;opacity:.9}
 .wm .ln{stroke:url(#logog);fill:none}
 .frame.short .wm{width:28px;height:28px;right:10px}
 
-/* Own control bar: play/pause and progress */
-.bar{position:absolute;z-index:5;left:0;right:0;bottom:0;display:flex;align-items:center;gap:6px;padding:0 10px 2px 4px;height:44px;
-  background:linear-gradient(#0000,#000b);transition:opacity .25s}
-/* While playing, the bar hides and the watermark moves down into the corner */
-.frame.isplaying .bar{opacity:0;pointer-events:none}
-.frame.isplaying .wm{bottom:14px}
-.pp{width:40px;height:40px;flex:none;border:0;background:none;color:#fff;display:grid;place-items:center;cursor:pointer;border-radius:50%;-webkit-tap-highlight-color:transparent}
-.pp path{fill:currentColor}
-.track{flex:1;height:32px;display:flex;align-items:center;cursor:pointer;touch-action:none;-webkit-tap-highlight-color:transparent}
-.rail{position:relative;width:100%;height:3px;border-radius:2px;background:#ffffff38}
-.fill{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:2px;background:#ece9e1}
-.fill::after{content:"";position:absolute;right:-6px;top:50%;width:12px;height:12px;margin-top:-6px;border-radius:50%;background:#ece9e1;transform:scale(0);transition:transform .12s}
-.track:hover .fill::after,.track.drag .fill::after,.track:focus-visible .fill::after{transform:scale(1)}
-.pp:focus-visible,.track:focus-visible{outline:2px solid #ece9e1;outline-offset:2px}
-.frame.plainmode .bar{display:none}
+
 
 /* Footer */
 footer{width:100%;max-width:880px;margin:48px auto 0;padding:24px 0 28px;border-top:1px solid var(--line)}
@@ -173,8 +159,7 @@ footer{width:100%;max-width:880px;margin:48px auto 0;padding:24px 0 28px;border-
   .odbtn .ol,.ltbtn .ol{stroke:ButtonText!important}.odbtn .lamp{stroke:ButtonText!important;fill:Canvas!important;filter:none!important}.odbtn.on .lamp{fill:Highlight!important;stroke:Highlight!important}
   .odbtn:focus-visible{outline-color:Highlight}
   .ltbtn .stick{stroke:ButtonText!important}.ltbtn .tip{fill:ButtonText!important}.ltbtn.on .stick{stroke:Highlight!important}.ltbtn.on .tip{fill:Highlight!important}.ltbtn:focus-visible{outline-color:Highlight}
-  .wm .ln{stroke:CanvasText}.bar{background:Canvas;border-top:1px solid CanvasText}.pp{color:ButtonText;border:1px solid ButtonText}
-  .rail{background:GrayText}.fill,.fill::after{background:Highlight}.pp:focus-visible,.track:focus-visible{outline-color:Highlight}
+  .wm .ln{stroke:CanvasText}
   footer{border-top-color:CanvasText}.social a{color:LinkText}.social a:focus-visible{outline-color:Highlight}
 }
 </style>
@@ -200,10 +185,6 @@ footer{width:100%;max-width:880px;margin:48px auto 0;padding:24px 0 28px;border-
         <span class="poster" id="poster"><span class="btn"><svg width="26" height="26" viewBox="0 0 22 22" aria-hidden="true"><path d="M7 4l12 7-12 7z" fill="#fff"/></svg></span></span>
       </button>
       <svg class="wm" viewBox="100 80 185 180" aria-hidden="true"><g class="ln" stroke-width="6"><line x1="109.5" y1="84" x2="109.5" y2="256"/><line x1="192" y1="84" x2="192" y2="256"/><line x1="274" y1="84" x2="274" y2="256"/><line x1="151" y1="167" x2="151" y2="256"/><line x1="148" y1="169.5" x2="233.5" y2="169.5" stroke-width="5"/></g></svg>
-      <div class="bar" id="bar">
-        <button class="pp" id="pp" aria-label="Play"><svg width="18" height="18" viewBox="0 0 22 22" aria-hidden="true"><path id="ppIcon" d="M6 3l14 8-14 8z"/></svg></button>
-        <div class="track" id="track" tabindex="0" role="slider" aria-label="Video position" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="rail"><div class="fill" id="fill"></div></div></div>
-      </div>
     </div>
   </div>
 </div>
@@ -316,22 +297,18 @@ const frame=document.getElementById('frame'),cover=document.getElementById('cove
 let yt=null,ready=false,playing=false,current=null,fallback=0;
 
 const logo=document.getElementById('logo'),lgPlay=document.getElementById('lgPlay'),lgFill=document.getElementById('lgFill'),lgProg=document.getElementById('lgProg'),lgSeek=document.getElementById('lgSeek'),lgVol=document.getElementById('lgVol'),lgVolZ=document.getElementById('lgVolZ');
-const pp=document.getElementById('pp'),ppIcon=document.getElementById('ppIcon'),track=document.getElementById('track'),fill=document.getElementById('fill');
-const PLAY="M6 3l14 8-14 8z",PAUSE="M5 3h4v16H5zM13 3h4v16h-4z";
 let started=false;
 /* on: show the play button. Before the first play it sits on the thumbnail; after that, on the paused picture. */
 function showPoster(on){
   poster.classList.toggle('hidden',!on);
   poster.classList.toggle('paused',on&&started);
   cover.setAttribute('aria-label',on?'Play video':'Pause video');
-  ppIcon.setAttribute('d',on?PLAY:PAUSE);frame.classList.toggle('isplaying',!on);pp.setAttribute('aria-label',on?'Play':'Pause');
   logo.classList.toggle('playing',!on);lgPlay.setAttribute('aria-label',on?'Play':'Pause');
 }
 /* Upright videos use the upright thumbnail when YouTube has one. If not, the normal thumbnail is used:
    its upright picture sits in the middle, and the box crops away the black sides. */
 function thumb(v){return `url(https://i.ytimg.com/vi/${v.id}/${upright(v)&&v.oar?'oardefault':'hqdefault'}.jpg)`}
 function setFill(f){
-  fill.style.width=(f*100)+'%';track.setAttribute('aria-valuenow',Math.round(f*100));
   lgFill.style.width=(f*46.22)+'%';lgProg.style.left=(25.95+f*46.22)+'%';lgSeek.setAttribute('aria-valuenow',Math.round(f*100));
 }
 /* Shape check: YouTube keeps an "original shape" thumbnail (oardefault) for upright videos.
@@ -377,24 +354,19 @@ function toggle(){
   clearTimeout(fallback);
   fallback=setTimeout(()=>{if(!playing){cover.classList.add('hidden');frame.classList.add('direct','plainmode')}},1500);
 }
-cover.addEventListener('click',toggle);pp.addEventListener('click',toggle);
+cover.addEventListener('click',toggle);
 
-/* Progress bar: tap or drag to jump, arrow keys move 5 seconds */
+/* Jumping in the video: tap or drag on the logo's crossbar, arrow keys move 5 seconds */
 let dragging=false;
-function seekAt(x,bar=track){
+function seekAt(x,bar){
   if(!ready)return;const r=bar.getBoundingClientRect(),d=yt.getDuration();if(!(d>0))return;
   const f=Math.max(0,Math.min(1,(x-r.left)/r.width));setFill(f);yt.seekTo(f*d,true);
 }
-track.addEventListener('pointerdown',e=>{e.preventDefault();dragging=true;track.classList.add('drag');track.setPointerCapture(e.pointerId);seekAt(e.clientX)});
-track.addEventListener('pointermove',e=>{if(dragging)seekAt(e.clientX)});
-const endDrag=()=>{dragging=false;track.classList.remove('drag')};
-track.addEventListener('pointerup',endDrag);track.addEventListener('pointercancel',endDrag);
 function seekKey(e){
   if(!ready)return;const d=yt.getDuration();if(!(d>0))return;
   const step=e.key==="ArrowRight"?5:e.key==="ArrowLeft"?-5:0;if(!step)return;
   e.preventDefault();const t=Math.max(0,Math.min(d-1,yt.getCurrentTime()+step));yt.seekTo(t,true);setFill(t/d);
 }
-track.addEventListener('keydown',seekKey);
 
 /* Logo player: first line plays and pauses, crossbar shows and moves the position, last line sets the volume */
 lgPlay.addEventListener('click',toggle);
