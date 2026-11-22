@@ -11,6 +11,12 @@
 :root{color-scheme:dark;--bg:#0b0b0c;--ink:#ece9e1;--dim:#8f8c85;--line:#1d1d20;
   --w:min(100%,880px,calc((100svh - 385px) * 16 / 9))}
 @supports not (height:1svh){:root{--w:min(100%,880px,calc((100vh - 385px) * 16 / 9))}}
+/* Light version: same layout, daylight colours. The video area stays black. */
+:root[data-mode=light]{color-scheme:light;--bg:#ecebe6;--ink:#1b1b1d;--dim:#66635c;--line:#d3d0c7}
+:root[data-mode=light] .ring{stroke:#c9c6bd}
+:root[data-mode=light] .frame{box-shadow:0 0 0 1px #0000001a,0 18px 40px -22px #0007}
+:root[data-mode=light] .odbtn .sw{box-shadow:0 0 0 3px #bdbab1,0 3px 6px #0004}
+:root[data-mode=light] .odbtn .led{background:#c9b3ae}
 *{box-sizing:border-box;min-width:0}
 html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,sans-serif;overflow-x:clip}
 .page{min-height:100vh;min-height:100svh;display:flex;flex-direction:column;padding:32px max(4vw,16px) 0}
@@ -28,13 +34,29 @@ html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui
 .odbtn:active .sw{transform:scale(.94)}
 .odbtn:focus-visible{outline:2px solid var(--ink);outline-offset:2px;border-radius:8px}
 .od>span{font:600 11px/13px Oswald,Impact,sans-serif;letter-spacing:.1em;color:var(--ink)}
-.knobs>.k:last-child{justify-self:end}
+.knobs>.right{justify-self:end;display:flex;align-items:flex-start;gap:10px}
+/* Light switch: a small amp toggle, lever down = dark, lever up = light */
+.lt{display:flex;flex-direction:column;align-items:center;gap:8px}
+.ltbtn{width:44px;height:96px;border:0;padding:0;background:none;cursor:pointer;display:grid;place-items:center;-webkit-tap-highlight-color:transparent}
+.ltbtn svg{width:34px;height:70px;overflow:visible}
+.ltbtn .plate{fill:#1a1a1d;stroke:#2c2c30}
+.ltbtn .nut{fill:url(#nutg)}
+.ltbtn .lever{transform-origin:17px 35px;transition:transform .15s;transform:rotate(180deg)}
+.ltbtn.on .lever{transform:rotate(0deg)}
+.ltbtn .stick{stroke:#cfcfd4;stroke-width:5;stroke-linecap:round}
+.ltbtn .tip{fill:#e9e9ec}
+.ltbtn:focus-visible{outline:2px solid var(--ink);outline-offset:2px;border-radius:8px}
+:root[data-mode=light] .ltbtn .plate{fill:#d9d6ce;stroke:#b5b2a8}
+:root[data-mode=light] .ltbtn .stick{stroke:#6a6a70}
+:root[data-mode=light] .ltbtn .tip{fill:#3a3a3f}
+.lt>span{font:600 11px/13px Oswald,Impact,sans-serif;letter-spacing:.1em;color:var(--ink)}
 .k{display:flex;flex-direction:column;align-items:center;gap:8px}
 .k svg{display:block;width:96px;height:96px;touch-action:none;cursor:grab;outline:none;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
 .k.wide svg{width:154px}
 .k span{font:600 13px/1 Oswald,Impact,sans-serif;letter-spacing:.14em;color:var(--ink)}
 .scale text{font:500 9px system-ui,sans-serif;fill:var(--dim);letter-spacing:.02em}
-.k.wide .scale text{font-size:9.5px;letter-spacing:.08em}
+.k.wide .scale text{font-size:9.5px;letter-spacing:.08em;transition:opacity .2s}
+.scale text.off{opacity:.3}
 .cap{fill:url(#capg)}
 .ptr{stroke:#161616;stroke-width:3.5;stroke-linecap:round}
 .ring{fill:none;stroke:#222226;stroke-width:2}
@@ -88,10 +110,6 @@ html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui
 .pp:focus-visible,.track:focus-visible{outline:2px solid #ece9e1;outline-offset:2px}
 .frame.plainmode .bar{display:none}
 
-/* Temporary link line */
-.linkline{margin:14px 0 0;text-align:center;font-size:13px;color:var(--dim);overflow-wrap:anywhere}
-.linkline a{color:var(--ink)}
-.linkline button{margin-left:6px;min-height:32px;padding:0 12px;border:1px solid #3a3a3f;border-radius:16px;background:none;color:var(--ink);font:inherit;cursor:pointer}
 
 /* Footer */
 footer{width:100%;max-width:880px;margin:48px auto 0;padding:24px 0 28px;border-top:1px solid var(--line)}
@@ -110,7 +128,8 @@ footer{width:100%;max-width:880px;margin:48px auto 0;padding:24px 0 28px;border-
   .logo{width:56px;height:56px;margin-top:12px}
   .knobs>.left{gap:4px}
   .odbtn{width:52px;height:80px;gap:10px}.odbtn .sw{width:32px;height:32px}
-  .od>span{font-size:10px;letter-spacing:.06em}
+  .od>span,.lt>span{font-size:10px;letter-spacing:.06em}
+  .k.wide svg{width:118px}.knobs>.right{gap:0}.ltbtn{width:38px;height:80px}.ltbtn svg{width:28px;height:58px}
   /* Phone: video goes edge to edge */
   .stage{margin:0 -12px;height:min(58vh,calc(100vw * 1.05));height:min(58svh,calc(100cqw * 1.05))}
   .frame{border-radius:0;box-shadow:none}
@@ -121,21 +140,28 @@ footer{width:100%;max-width:880px;margin:48px auto 0;padding:24px 0 28px;border-
   .k svg{width:72px;height:72px}.k.wide svg{width:116px}
   .odbtn{width:46px;height:72px}.odbtn .sw{width:28px;height:28px}
   .logo{width:46px;height:46px}
-  .od>span{font-size:9.5px;letter-spacing:.03em}
+  .od>span,.lt>span{font-size:9.5px;letter-spacing:.03em}
+  .k.wide svg{width:104px}.ltbtn{width:34px;height:72px}.ltbtn svg{width:24px;height:50px}
   .knobs>.left{gap:0}
+}
+@media(max-width:340px){
+  .k svg{width:62px;height:62px}.k.wide svg{width:92px}.logo{width:36px;height:36px}
+  .odbtn{width:40px;height:62px}.odbtn .sw{width:24px;height:24px}.ltbtn{height:62px}
+  .od>span,.lt>span,.k span{font-size:9px}
 }
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 @media(forced-colors:active){
-  .cap{fill:Canvas;stroke:CanvasText;stroke-width:2}.ptr{stroke:Highlight}.ring{stroke:CanvasText}
-  .scale text{fill:CanvasText}.frame{border:1px solid CanvasText}
+  .cap{fill:Canvas;stroke:CanvasText;stroke-width:2}.ptr{stroke:Highlight}.ring{stroke:CanvasText!important}
+  .scale text{fill:CanvasText}.scale text.off{fill:GrayText}.frame{border:1px solid CanvasText}
   .logo .ln{stroke:CanvasText}
   .poster .btn{border:2px solid CanvasText;background:Canvas}.poster .btn path{fill:CanvasText}
   .cover:focus-visible{outline-color:Highlight}
   .odbtn .sw{background:Canvas;border:2px solid ButtonText;box-shadow:none}.odbtn .led{forced-color-adjust:none;background:Canvas;border:1px solid CanvasText;box-shadow:none}
   .odbtn.on .led{background:Highlight;border-color:Highlight}.odbtn:focus-visible{outline-color:Highlight}
+  .ltbtn .plate{fill:Canvas!important;stroke:ButtonText!important}.ltbtn .nut{fill:Canvas!important;stroke:ButtonText}.ltbtn .stick{stroke:ButtonText!important}.ltbtn .tip{fill:ButtonText!important}.ltbtn.on .stick{stroke:Highlight!important}.ltbtn.on .tip{fill:Highlight!important}
+  .odbtn .led{background:Canvas!important}.odbtn.on .led{background:Highlight!important}.ltbtn:focus-visible{outline-color:Highlight}
   .wm .ln{stroke:CanvasText}.bar{background:Canvas;border-top:1px solid CanvasText}.pp{color:ButtonText;border:1px solid ButtonText}
   .rail{background:GrayText}.fill,.fill::after{background:Highlight}.pp:focus-visible,.track:focus-visible{outline-color:Highlight}
-  .linkline a{color:LinkText}.linkline button{color:ButtonText;border-color:ButtonText}
   footer{border-top-color:CanvasText}.social a{color:LinkText}.social a:focus-visible{outline-color:Highlight}
 }
 </style>
@@ -168,8 +194,6 @@ footer{width:100%;max-width:880px;margin:48px auto 0;padding:24px 0 28px;border-
       </div>
     </div>
   </div>
-  <!-- TEMPORARY: link of the video on screen, so wrong shapes can be reported. Remove when done. -->
-  <p class="linkline">Video link: <a id="vlink" href="#" target="_blank" rel="noopener"></a> <button id="copy" type="button">Copy</button></p>
 </div>
 <footer>
   <ul class="social">
@@ -182,25 +206,43 @@ footer{width:100%;max-width:880px;margin:48px auto 0;padding:24px 0 28px;border-
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
   <linearGradient id="logog" gradientUnits="userSpaceOnUse" x1="0" y1="84" x2="0" y2="256"><stop offset="0" stop-color="#990000"/><stop offset=".72" stop-color="#3a0000"/><stop offset="1" stop-color="#370000"/></linearGradient>
+  <radialGradient id="nutg" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#e4e4e8"/><stop offset=".6" stop-color="#8e8e95"/><stop offset="1" stop-color="#4a4a50"/></radialGradient>
   <radialGradient id="capg" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#fbf6e7"/><stop offset=".7" stop-color="#d9d0b8"/><stop offset="1" stop-color="#9c9480"/></radialGradient>
 </defs></svg>
 
 <script>
 {
-/* Each type lists its videos from the lightest to the heaviest.
-   Gain 0 shows the first (lightest), gain 10 the last (heaviest).
-   s:1 marks a /shorts/ link (first guess). f:true or f:false sets the shape by hand (upright or wide). */
-const types=[
-  {label:"KEYS",name:"Keys",v:[{id:"im13LzBOD_w"},{id:"DEANSHDWww0"},{id:"AG3WGAEKPGY"},{id:"6VrBtL-pBQk"}]},
-  {label:"GUITAR",name:"Guitar Only",v:[{id:"74Fn6fPGEnE"},{id:"quwbFH3pn8A"}]},
-  {label:"SONGS",name:"Full Songs",v:[{id:"2iNbePz8Ao0",s:1},{id:"n-DhYip3wh8",s:1},{id:"i6rgYLaGDbg",f:true},{id:"tCl8g3aSStY"},{id:"ZwpYgKk2IPk"},{id:"ggS8HsNWE3s",s:1},{id:"73ziziUBd6U",s:1}]}
+/* ================= VIDEO LIBRARY: the only part to edit =================
+   Each Type has two lists. Both go from the lightest video (Gain 0) to the heaviest (Gain 10).
+     clean      shown when Overdrive is off
+     overdrive  shown when Overdrive is on (leave it as [] if there are none yet)
+   Write each video as its YouTube ID in quotes, for example "im13LzBOD_w".
+   (In a link like https://youtu.be/im13LzBOD_w the ID is the part after the last slash.)
+   The page finds out by itself if a video is upright or wide. If it gets one wrong,
+   write that video like this instead: {id:"i6rgYLaGDbg", shape:"upright"}  or  shape:"wide"
+   ========================================================================= */
+const LIBRARY=[
+  {label:"KEYS",   name:"Keys",
+    clean:["im13LzBOD_w","DEANSHDWww0","AG3WGAEKPGY","6VrBtL-pBQk"],
+    overdrive:[]},
+  {label:"GUITAR", name:"Guitar Only",
+    clean:["74Fn6fPGEnE","quwbFH3pn8A"],
+    overdrive:[]},
+  {label:"SONGS",  name:"Full Songs",
+    clean:["2iNbePz8Ao0","n-DhYip3wh8",{id:"i6rgYLaGDbg",shape:"upright"},"tCl8g3aSStY","ZwpYgKk2IPk","ggS8HsNWE3s","73ziziUBd6U"],
+    overdrive:["uso0dnW1UiI","x3fvDBi8R0g"]}
 ];
-/* Overdrive on: only the two heaviest songs, Gain picks between them */
-const OD={name:"Overdrive",v:[{id:"uso0dnW1UiI"},{id:"x3fvDBi8R0g"}]};
+/* ======================== end of video library ========================== */
+
+const norm=e=>typeof e==="string"?{id:e}:{id:e.id,f:e.shape==="upright"?true:e.shape==="wide"?false:undefined};
+const types=LIBRARY.map(t=>({label:t.label,name:t.name,clean:(t.clean||[]).map(norm),overdrive:(t.overdrive||[]).map(norm)}));
 let od=false;
+/* Which list is showing, and which Type positions have videos in the current mode */
+const listOf=i=>od?types[i].overdrive:types[i].clean;
+const usable=i=>listOf(i).length>0;
 const knobs=[
   {id:"gain",label:"GAIN",v:0,steps:0},
-  {id:"type",label:"TYPE",v:0,steps:3}
+  {id:"type",label:"TYPE",v:0,steps:types.length}
 ];
 const A0=-135,A1=135,S0=-55,S1=55;
 const get=id=>knobs.find(k=>k.id===id);
@@ -211,7 +253,7 @@ function scale(k){
   for(let i=0;i<n;i++){
     const a=((k.steps?S0+i/(n-1)*(S1-S0):A0+i/(n-1)*(A1-A0))-90)*Math.PI/180,r=44;
     const anchor=k.steps?(i===0?"end":i===n-1?"start":"middle"):"middle";
-    out.push(`<text x="${50+r*Math.cos(a)}" y="${50+r*Math.sin(a)+3}" text-anchor="${anchor}">${k.steps?types[i].label:i}</text>`);
+    out.push(`<text class="${k.steps?'p'+i:''}" x="${50+r*Math.cos(a)}" y="${50+r*Math.sin(a)+3}" text-anchor="${anchor}">${k.steps?types[i].label:i}</text>`);
   }
   return out.join('');
 }
@@ -225,9 +267,32 @@ const knobHtml=k=>`
   <span>${k.label}</span>
  </div>`;
 const odHtml=`<div class="od"><button id="odBtn" class="odbtn" aria-pressed="false" aria-label="Overdrive"><span class="led" aria-hidden="true"></span><span class="sw" aria-hidden="true"></span></button><span>OVERDRIVE</span></div>`;
-document.getElementById('knobs').innerHTML=`<div class="left">${knobHtml(knobs[0])}${odHtml}</div>`+document.getElementById('logoTpl').innerHTML+knobHtml(knobs[1]);
+const ltHtml=`<div class="lt"><button id="ltBtn" class="ltbtn" aria-pressed="false" aria-label="Light version"><svg viewBox="0 0 34 70" aria-hidden="true"><rect class="plate" x="3" y="16" width="28" height="38" rx="6"/><circle class="nut" cx="17" cy="35" r="9"/><g class="lever"><line class="stick" x1="17" y1="35" x2="17" y2="8"/><circle class="tip" cx="17" cy="7" r="5"/></g></svg></button><span>LIGHT</span></div>`;
+document.getElementById('knobs').innerHTML=`<div class="left">${knobHtml(knobs[0])}${odHtml}</div>`+document.getElementById('logoTpl').innerHTML+`<div class="right">${knobHtml(knobs[1])}${ltHtml}</div>`;
+/* Light switch: remembers the choice on this device */
+const ltBtn=document.getElementById('ltBtn');
+function setMode(light){
+  document.documentElement.dataset.mode=light?'light':'dark';
+  ltBtn.classList.toggle('on',light);ltBtn.setAttribute('aria-pressed',light);
+  try{localStorage.setItem('wh-mode',light?'light':'dark')}catch(e){}
+}
+let saved=null;try{saved=localStorage.getItem('wh-mode')}catch(e){}
+setMode(saved==='light');
+ltBtn.addEventListener('click',()=>setMode(!ltBtn.classList.contains('on')));
 const odBtn=document.getElementById('odBtn');
-odBtn.addEventListener('click',()=>{od=!od;odBtn.setAttribute('aria-pressed',od);odBtn.classList.toggle('on',od);render()});
+/* Overdrive: if the Type in use has no videos for the new mode, the Type knob turns by itself,
+   to SONGS when it can, otherwise to the first Type that has videos */
+odBtn.addEventListener('click',()=>{
+  od=!od;
+  const ty=get('type');
+  if(!usable(ty.v)){
+    const songs=types.findIndex(t=>t.label==="SONGS");
+    const pick=songs>=0&&usable(songs)?songs:types.findIndex((t,i)=>usable(i));
+    if(pick<0){od=!od;return}
+    ty.v=pick;
+  }
+  odBtn.setAttribute('aria-pressed',od);odBtn.classList.toggle('on',od);render();
+});
 
 /* Player: YouTube without its buttons. Our own cover handles play and pause. */
 const frame=document.getElementById('frame'),cover=document.getElementById('cover'),poster=document.getElementById('poster');
@@ -250,8 +315,8 @@ function setFill(f){fill.style.width=(f*100)+'%';track.setAttribute('aria-valuen
 /* Shape check: YouTube keeps an "original shape" thumbnail (oardefault) for upright videos.
    If it exists and is taller than wide, the video is upright. If it is missing or wide, the video is wide.
    Until the check is done, the link type (/shorts/ or not) is used as a first guess. */
-function upright(v){return v.f!==undefined?v.f:v.up===undefined?!!v.s:v.up}
-for(const t of [...types,OD])for(const v of t.v){
+function upright(v){return v.f!==undefined?v.f:!!v.up}
+for(const t of types)for(const v of [...t.clean,...t.overdrive]){
   const img=new Image();
   const done=()=>{if(v===current){frame.classList.toggle('short',v.up);poster.style.backgroundImage=thumb(v)}};
   img.onload=()=>{v.oar=true;v.up=v.f!==undefined?v.f:img.naturalHeight>img.naturalWidth*1.1;done()};
@@ -271,7 +336,6 @@ function plainPlayer(){
 }
 function load(vid){
   current=vid;playing=false;started=false;setFill(0);frame.classList.remove('direct','plainmode');
-  const l=`https://youtu.be/${vid.id}`;vlink.href=l;vlink.textContent=l;
   plain.classList.add('hidden');plain.removeAttribute('src');
   if(apiFailed){frame.classList.toggle('short',upright(vid));plainPlayer();return}
   frame.classList.toggle('short',upright(vid));
@@ -306,13 +370,7 @@ track.addEventListener('keydown',e=>{
   e.preventDefault();const t=Math.max(0,Math.min(d-1,yt.getCurrentTime()+step));yt.seekTo(t,true);setFill(t/d);
 });
 
-/* TEMPORARY: copy the link of the video on screen */
-const vlink=document.getElementById('vlink'),copyBtn=document.getElementById('copy');
-copyBtn.addEventListener('click',async()=>{
-  try{await navigator.clipboard.writeText(vlink.href);copyBtn.textContent='Copied'}
-  catch(e){const r=document.createRange();r.selectNodeContents(vlink);const sel=getSelection();sel.removeAllRanges();sel.addRange(r);copyBtn.textContent='Selected'}
-  setTimeout(()=>copyBtn.textContent='Copy',1500);
-});
+
 /* Stop just before the end, so YouTube's end screen and suggestions never appear */
 setInterval(()=>{
   if(!ready||!playing)return;
@@ -337,19 +395,29 @@ window.onYouTubeIframeAPIReady=()=>{
 const s=document.createElement('script');s.src='https://www.youtube.com/iframe_api';document.head.appendChild(s);
 
 function render(){
-  const t=od?OD:types[get('type').v],list=t.v;
+  const list=listOf(get('type').v);
   const i=Math.min(list.length-1,Math.floor(get('gain').v/10*list.length));
   for(const k of knobs){
     const el=document.getElementById('k-'+k.id);
     el.querySelector('.rot').setAttribute('transform',`rotate(${ang(k)} 50 50)`);
     el.setAttribute('aria-valuemin',0);el.setAttribute('aria-valuemax',k.steps?k.steps-1:10);
     el.setAttribute('aria-valuenow',k.v);
-    el.setAttribute('aria-valuetext',k.id==="type"?types[k.v].name:`${k.v}, video ${i+1} of ${list.length}`);
+    el.setAttribute('aria-valuetext',k.id==="type"?types[k.v].name+(od?", overdrive":""):`${k.v}, video ${i+1} of ${list.length}`);
   }
+  /* Type names without videos in this mode are dimmed, and the knob skips them */
+  types.forEach((t,i)=>document.querySelector('#k-type .p'+i).classList.toggle('off',!usable(i)));
   if(list[i]!==current)load(list[i]);
 }
 function set(k,v){
-  k.v=k.steps?Math.max(0,Math.min(k.steps-1,Math.round(v))):Math.max(0,Math.min(10,Math.round(v*10)/10));
+  if(k.steps){
+    let n=Math.max(0,Math.min(k.steps-1,Math.round(v)));
+    if(n!==k.v&&!usable(n)){
+      const dir=n>k.v?1:-1;let j=n;
+      while(j>=0&&j<k.steps&&!usable(j))j+=dir;
+      n=(j>=0&&j<k.steps)?j:k.v;
+    }
+    k.v=n;
+  }else k.v=Math.max(0,Math.min(10,Math.round(v*10)/10));
   render();
 }
 for(const k of knobs){
