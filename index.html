@@ -7,48 +7,104 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@600&display=swap" rel="stylesheet">
 <style>
-:root{color-scheme:dark;--bg:#0b0b0c;--cream:#e9e2cf;--dim:#8d8b85}
+/* Dark, tidy amp face: one column, knobs and logo on one line, video below at the same width */
+:root{color-scheme:dark;--bg:#0b0b0c;--ink:#ece9e1;--dim:#8f8c85;--line:#1d1d20;
+  --w:min(100%,calc((100svh - 190px) * 16 / 9))}
 *{box-sizing:border-box;min-width:0}
-body{margin:0;background:var(--bg);color:var(--cream);font:16px/1.5 system-ui,sans-serif;overflow-x:clip}
-.page{max-width:1240px;margin:auto;padding:clamp(28px,5vw,56px) max(5vw,16px)}
-.knobs{display:flex;justify-content:center;gap:clamp(12px,5vw,56px);margin-bottom:clamp(28px,5vw,48px)}
-.k{display:flex;flex-direction:column;align-items:center;gap:6px;width:110px}.k.wide{width:150px}
-.k svg{overflow:visible;width:96px;height:96px;touch-action:none;cursor:grab;border-radius:50%}
-.k svg{outline:none;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
-.k span{font:600 14px/1 Oswald,Impact,sans-serif;letter-spacing:.08em}
-.scale text{font:500 9px system-ui,sans-serif;fill:var(--dim)}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,sans-serif;overflow-x:clip}
+.page{padding:24px max(4vw,16px) 40px}
+.wrap{width:max(var(--w),min(100%,720px));margin:0 auto}
+
+/* Gain left, logo exactly centred, Type right */
+.knobs{display:grid;grid-template-columns:1fr auto 1fr;align-items:start;margin-bottom:24px}
+.knobs>.k:first-child{justify-self:start}
+.knobs>.k:last-child{justify-self:end}
+.k{display:flex;flex-direction:column;align-items:center;gap:8px}
+.k svg{display:block;width:96px;height:96px;touch-action:none;cursor:grab;outline:none;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
+.k.wide svg{width:154px}
+.k span{font:600 13px/1 Oswald,Impact,sans-serif;letter-spacing:.14em;color:var(--ink)}
+.scale text{font:500 9px system-ui,sans-serif;fill:var(--dim);letter-spacing:.02em}
+.k.wide .scale text{font-size:9.5px;letter-spacing:.08em}
 .cap{fill:url(#capg)}
-.ptr{stroke:#1a1a1a;stroke-width:4;stroke-linecap:round}
-.ring{fill:none;stroke:#2c2c30;stroke-width:3}
-.grid{max-width:900px;margin:auto}
-.frame{aspect-ratio:16/9;border-radius:6px;background:radial-gradient(circle at 30% 30%,#25252a,#0f0f11);display:grid;place-items:center}
-.frame{overflow:hidden}.frame iframe{display:block;width:100%;height:100%;border:0}
-@media(max-width:600px){.knobs{gap:8px}.k{width:96px}.k.wide{width:140px}.k svg{width:84px;height:84px}}
+.ptr{stroke:#161616;stroke-width:3.5;stroke-linecap:round}
+.ring{fill:none;stroke:#222226;stroke-width:2}
+.logo{display:block;width:96px;height:96px}
+.logo .ln{stroke:url(#logog);fill:none}
+
+/* Video: frameless, as large as the screen allows */
+.stage{display:flex;justify-content:center}
+.frame{position:relative;overflow:hidden;background:#000;border-radius:8px;aspect-ratio:16/9;width:100%;
+  box-shadow:0 0 0 1px var(--line),0 24px 60px -20px #000}
+.frame.short{aspect-ratio:9/16;width:min(100%,calc((100svh - 190px) * 9 / 16))}
+.frame>div,.frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.cover{position:absolute;inset:0;border:0;padding:0;margin:0;background:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.poster{position:absolute;inset:0;background:#000 center/cover no-repeat;display:grid;place-items:center}
+.poster::after{content:"";position:absolute;inset:0;background:linear-gradient(#0000 55%,#0006)}
+.poster .btn{position:relative;z-index:1;width:68px;height:68px;border-radius:50%;background:#0b0b0cb3;
+  box-shadow:inset 0 0 0 1px #ffffff40;display:grid;place-items:center;transition:transform .15s,background .15s}
+.poster .btn svg{margin-left:3px}
+.cover:hover .btn,.cover:focus-visible .btn{transform:scale(1.06);background:#0b0b0ce6}
+.cover:focus-visible{outline:2px solid var(--ink);outline-offset:-2px}
+.hidden{display:none}
+
+@media(max-width:600px){
+  .page{padding:16px 12px 24px}
+  .knobs{margin-bottom:16px}
+  .k svg{width:80px;height:80px}.k.wide svg{width:128px}
+  .logo{width:72px;height:72px;margin-top:4px}
+  /* Phone: video goes edge to edge */
+  .stage{margin:0 -12px}
+  .frame{border-radius:0;box-shadow:none}
+  .frame.short{width:min(100%,calc(100svh * 9 / 16))}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
 @media(forced-colors:active){
   .cap{fill:Canvas;stroke:CanvasText;stroke-width:2}.ptr{stroke:Highlight}.ring{stroke:CanvasText}
-  .scale text{fill:CanvasText}
-  .frame{border:1px solid CanvasText}
+  .scale text{fill:CanvasText}.frame{border:1px solid CanvasText}
+  .logo .ln{stroke:CanvasText}
+  .poster .btn{border:2px solid CanvasText;background:Canvas}.poster .btn path{fill:CanvasText}
+  .cover:focus-visible{outline-color:Highlight}
 }
 </style>
 </head>
 <body>
-<div class="page">
+<div class="page"><div class="wrap">
   <div class="knobs" id="knobs"></div>
-  <div class="grid"><div class="frame"><iframe id="player" title="Video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div></div>
-</div>
+  <template id="logoTpl">
+  <svg class="logo" viewBox="100 80 185 180" role="img" aria-label="Wojciech Hryniewicki logo">
+    <g class="ln" stroke-width="6" stroke-linecap="butt">
+      <line x1="109.5" y1="84" x2="109.5" y2="256"/>
+      <line x1="192" y1="84" x2="192" y2="256"/>
+      <line x1="274" y1="84" x2="274" y2="256"/>
+      <line x1="151" y1="167" x2="151" y2="256"/>
+      <line x1="148" y1="169.5" x2="233.5" y2="169.5" stroke-width="5"/>
+    </g>
+  </svg>
+  </template>
+  <div class="stage">
+    <div class="frame" id="frame">
+      <div id="player"></div>
+      <button class="cover" id="cover" aria-label="Play video">
+        <span class="poster" id="poster"><span class="btn"><svg width="26" height="26" viewBox="0 0 22 22" aria-hidden="true"><path d="M7 4l12 7-12 7z" fill="#fff"/></svg></span></span>
+      </button>
+    </div>
+  </div>
+</div></div>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <linearGradient id="logog" gradientUnits="userSpaceOnUse" x1="0" y1="84" x2="0" y2="256"><stop offset="0" stop-color="#990000"/><stop offset=".72" stop-color="#3a0000"/><stop offset="1" stop-color="#370000"/></linearGradient>
   <radialGradient id="capg" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#fbf6e7"/><stop offset=".7" stop-color="#d9d0b8"/><stop offset="1" stop-color="#9c9480"/></radialGradient>
 </defs></svg>
 
 <script>
 {
 /* Each type lists its videos from the lightest to the heaviest.
-   Gain 0 shows the first (lightest), gain 10 the last (heaviest). */
+   Gain 0 shows the first (lightest), gain 10 the last (heaviest).
+   s:1 marks a Short (upright video). */
 const types=[
-  {label:"LIGHT",name:"Light and Instrumental",ids:["im13LzBOD_w","DEANSHDWww0","AG3WGAEKPGY","6VrBtL-pBQk"]},
-  {label:"GUITAR",name:"Guitar Only",ids:["74Fn6fPGEnE","quwbFH3pn8A"]},
-  {label:"SONGS",name:"Full Songs",ids:["2iNbePz8Ao0","n-DhYip3wh8","i6rgYLaGDbg","tCl8g3aSStY","ZwpYgKk2IPk","ggS8HsNWE3s","73ziziUBd6U","uso0dnW1UiI","x3fvDBi8R0g"]}
+  {label:"LIGHT",name:"Light and Instrumental",v:[{id:"im13LzBOD_w"},{id:"DEANSHDWww0"},{id:"AG3WGAEKPGY"},{id:"6VrBtL-pBQk"}]},
+  {label:"GUITAR",name:"Guitar Only",v:[{id:"74Fn6fPGEnE"},{id:"quwbFH3pn8A"}]},
+  {label:"SONGS",name:"Full Songs",v:[{id:"2iNbePz8Ao0",s:1},{id:"n-DhYip3wh8",s:1},{id:"i6rgYLaGDbg"},{id:"tCl8g3aSStY"},{id:"ZwpYgKk2IPk"},{id:"ggS8HsNWE3s",s:1},{id:"73ziziUBd6U",s:1},{id:"uso0dnW1UiI"},{id:"x3fvDBi8R0g"}]}
 ];
 const knobs=[
   {id:"gain",label:"GAIN",v:0,steps:0},
@@ -61,50 +117,85 @@ const ang=k=>k.steps?S0+k.v/(k.steps-1)*(S1-S0):A0+k.v/10*(A1-A0);
 function scale(k){
   const n=k.steps||11,out=[];
   for(let i=0;i<n;i++){
-    const a=((k.steps?S0+i/(n-1)*(S1-S0):A0+i/(n-1)*(A1-A0))-90)*Math.PI/180,r=k.steps?44:44;
-    out.push(`<text x="${50+r*Math.cos(a)}" y="${50+r*Math.sin(a)+3}" text-anchor="${k.steps?(i===0?'end':i===n-1?'start':'middle'):'middle'}">${k.steps?types[i].label:i}</text>`);
+    const a=((k.steps?S0+i/(n-1)*(S1-S0):A0+i/(n-1)*(A1-A0))-90)*Math.PI/180,r=44;
+    const anchor=k.steps?(i===0?"end":i===n-1?"start":"middle"):"middle";
+    out.push(`<text x="${50+r*Math.cos(a)}" y="${50+r*Math.sin(a)+3}" text-anchor="${anchor}">${k.steps?types[i].label:i}</text>`);
   }
   return out.join('');
 }
-document.getElementById('knobs').innerHTML=knobs.map(k=>`
+const knobHtml=k=>`
  <div class="k${k.steps?' wide':''}">
-  <svg viewBox="0 0 100 100" id="k-${k.id}" tabindex="0" role="slider" aria-label="${k.label}">
+  <svg viewBox="${k.steps?'-30 0 160 100':'0 0 100 100'}" id="k-${k.id}" tabindex="0" role="slider" aria-label="${k.label}">
    <g class="scale">${scale(k)}</g>
    <circle class="ring" cx="50" cy="50" r="33"/>
    <g class="rot"><circle class="cap" cx="50" cy="50" r="28"/><line class="ptr" x1="50" y1="50" x2="50" y2="26"/></g>
   </svg>
   <span>${k.label}</span>
- </div>`).join('');
+ </div>`;
+document.getElementById('knobs').innerHTML=knobHtml(knobs[0])+document.getElementById('logoTpl').innerHTML+knobHtml(knobs[1]);
 
-const player=document.getElementById('player');
-let current="";
+/* Player: YouTube without its buttons. Our own cover handles play and pause. */
+const frame=document.getElementById('frame'),cover=document.getElementById('cover'),poster=document.getElementById('poster');
+let yt=null,ready=false,playing=false,current=null,fallback=0;
+
+function showPoster(on){
+  poster.classList.toggle('hidden',!on);
+  cover.setAttribute('aria-label',on?'Play video':'Pause video');
+}
+function load(vid){
+  current=vid;playing=false;
+  frame.classList.toggle('short',!!vid.s);
+  poster.style.backgroundImage=`url(https://i.ytimg.com/vi/${vid.id}/hqdefault.jpg)`;
+  cover.classList.remove('hidden');showPoster(true);
+  if(ready)yt.cueVideoById(vid.id);
+}
+cover.addEventListener('click',()=>{
+  if(!ready||!current)return;
+  if(playing){yt.pauseVideo();return}
+  yt.playVideo();showPoster(false);
+  /* If the phone refuses to start, hand the tap over to YouTube's own player */
+  clearTimeout(fallback);
+  fallback=setTimeout(()=>{if(!playing)cover.classList.add('hidden')},1500);
+});
+window.onYouTubeIframeAPIReady=()=>{
+  yt=new YT.Player('player',{
+    videoId:current?current.id:"",
+    host:'https://www.youtube-nocookie.com',
+    playerVars:{controls:0,rel:0,iv_load_policy:3,playsinline:1,disablekb:1,fs:0,cc_load_policy:0},
+    events:{
+      onReady:()=>{ready=true},
+      onStateChange:e=>{
+        if(e.data===1){playing=true;cover.classList.remove('hidden');showPoster(false)}
+        if(e.data===2||e.data===0){playing=false;showPoster(true)}
+      }
+    }
+  });
+};
+const s=document.createElement('script');s.src='https://www.youtube.com/iframe_api';document.head.appendChild(s);
+
 function render(){
-  const t=types[get('type').v],ids=t.ids;
-  const i=Math.min(ids.length-1,Math.floor(get('gain').v/10*ids.length));
+  const t=types[get('type').v],list=t.v;
+  const i=Math.min(list.length-1,Math.floor(get('gain').v/10*list.length));
   for(const k of knobs){
-    const s=document.getElementById('k-'+k.id);
-    s.querySelector('.rot').setAttribute('transform',`rotate(${ang(k)} 50 50)`);
-    s.setAttribute('aria-valuemin',0);s.setAttribute('aria-valuemax',k.steps?k.steps-1:10);
-    s.setAttribute('aria-valuenow',k.v);
-    s.setAttribute('aria-valuetext',k.id==="type"?t.name:`${k.v}, video ${i+1} of ${ids.length}`);
+    const el=document.getElementById('k-'+k.id);
+    el.querySelector('.rot').setAttribute('transform',`rotate(${ang(k)} 50 50)`);
+    el.setAttribute('aria-valuemin',0);el.setAttribute('aria-valuemax',k.steps?k.steps-1:10);
+    el.setAttribute('aria-valuenow',k.v);
+    el.setAttribute('aria-valuetext',k.id==="type"?t.name:`${k.v}, video ${i+1} of ${list.length}`);
   }
-  if(ids[i]!==current){
-    current=ids[i];
-    player.src=`https://www.youtube-nocookie.com/embed/${current}?rel=0`;
-    player.title=`${t.name}, video ${i+1} of ${ids.length}`;
-  }
+  if(list[i]!==current)load(list[i]);
 }
 function set(k,v){
   k.v=k.steps?Math.max(0,Math.min(k.steps-1,Math.round(v))):Math.max(0,Math.min(10,Math.round(v*10)/10));
   render();
 }
 for(const k of knobs){
-  const s=document.getElementById('k-'+k.id);let y0,v0,drag=false;
-  s.addEventListener('pointerdown',e=>{e.preventDefault();drag=true;y0=e.clientY;v0=k.v;s.setPointerCapture(e.pointerId)});
-  s.addEventListener('pointermove',e=>{if(drag)set(k,v0+(y0-e.clientY)/(k.steps?40:14))});
-  s.addEventListener('pointerup',()=>drag=false);s.addEventListener('pointercancel',()=>drag=false);
-  s.addEventListener('wheel',e=>{e.preventDefault();set(k,k.v+(e.deltaY<0?1:-1)*(k.steps?1:.5))},{passive:false});
-  s.addEventListener('keydown',e=>{const step=k.steps?1:.5;
+  const el=document.getElementById('k-'+k.id);let y0,v0,drag=false;
+  el.addEventListener('pointerdown',e=>{e.preventDefault();drag=true;y0=e.clientY;v0=k.v;el.setPointerCapture(e.pointerId)});
+  el.addEventListener('pointermove',e=>{if(drag)set(k,v0+(y0-e.clientY)/(k.steps?40:14))});
+  el.addEventListener('pointerup',()=>drag=false);el.addEventListener('pointercancel',()=>drag=false);
+  el.addEventListener('wheel',e=>{e.preventDefault();set(k,k.v+(e.deltaY<0?1:-1)*(k.steps?1:.5))},{passive:false});
+  el.addEventListener('keydown',e=>{const step=k.steps?1:.5;
     if(e.key==="ArrowUp"||e.key==="ArrowRight"){e.preventDefault();set(k,k.v+step)}
     if(e.key==="ArrowDown"||e.key==="ArrowLeft"){e.preventDefault();set(k,k.v-step)}});
 }
