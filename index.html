@@ -8,15 +8,12 @@
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@600&display=swap" rel="stylesheet">
 <style>
 /* Dark, tidy amp face: one column, knobs and logo on one line, video below at the same width */
-:root{color-scheme:dark;--bg:#0b0b0c;--ink:#ece9e1;--dim:#8f8c85;--line:#1d1d20;
+:root{color-scheme:dark;--bg:#0b0b0c;--ink:#f1efe9;--dim:#8f8c85;--scale:#bdb9b0;--line:#1d1d20;--logo:url(#logog);
   --w:min(100%,880px,calc((100svh - 385px) * 16 / 9))}
 @supports not (height:1svh){:root{--w:min(100%,880px,calc((100vh - 385px) * 16 / 9))}}
-/* Light version: same layout, daylight colours. The video area stays black. */
-:root[data-mode=light]{color-scheme:light;--bg:#ecebe6;--ink:#1b1b1d;--dim:#66635c;--line:#d3d0c7}
-:root[data-mode=light] .ring{stroke:#c9c6bd}
+/* Light version (style A): off-white page, black outline controls, black logo. Video area stays black. */
+:root[data-mode=light]{color-scheme:light;--bg:#f4f3ef;--ink:#111;--dim:#55524b;--scale:#333;--line:#d6d3ca;--logo:#111}
 :root[data-mode=light] .frame{box-shadow:0 0 0 1px #0000001a,0 18px 40px -22px #0007}
-:root[data-mode=light] .odbtn .sw{box-shadow:0 0 0 3px #bdbab1,0 3px 6px #0004}
-:root[data-mode=light] .odbtn .led{background:#c9b3ae}
 *{box-sizing:border-box;min-width:0}
 html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,sans-serif;overflow-x:clip}
 .page{min-height:100vh;min-height:100svh;display:flex;flex-direction:column;padding:32px max(4vw,16px) 0}
@@ -25,43 +22,36 @@ html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui
 /* Gain left, logo exactly centred, Type right */
 .knobs{display:grid;grid-template-columns:1fr auto 1fr;align-items:start;margin:0 auto 32px;max-width:600px}
 .knobs>.left{justify-self:start;display:flex;align-items:flex-start;gap:14px}
-/* Overdrive: a footswitch with a red lamp, same height and label line as the knobs */
-.od{display:flex;flex-direction:column;align-items:center;gap:8px}
-.odbtn{width:60px;height:96px;border:0;padding:0;background:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;cursor:pointer;-webkit-tap-highlight-color:transparent}
-.odbtn .led{width:10px;height:10px;border-radius:50%;background:#3a0d0b;box-shadow:inset 0 1px 2px #000;transition:background .15s,box-shadow .15s}
-.odbtn.on .led{background:radial-gradient(circle at 35% 35%,#ffb3aa,#e0312a 55%,#8a140f);box-shadow:0 0 10px #e0312a}
-.odbtn .sw{width:38px;height:38px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#d9d9dc,#8c8c92 60%,#4a4a4f);box-shadow:0 0 0 3px #1c1c1f,0 3px 6px #000;transition:transform .08s}
-.odbtn:active .sw{transform:scale(.94)}
-.odbtn:focus-visible{outline:2px solid var(--ink);outline-offset:2px;border-radius:8px}
-.od>span{font:600 11px/13px Oswald,Impact,sans-serif;letter-spacing:.1em;color:var(--ink)}
-.knobs>.right{justify-self:end;display:flex;align-items:flex-start;gap:10px}
-/* Light switch: a small amp toggle, lever down = dark, lever up = light */
-.lt{display:flex;flex-direction:column;align-items:center;gap:8px}
-.ltbtn{width:44px;height:96px;border:0;padding:0;background:none;cursor:pointer;display:grid;place-items:center;-webkit-tap-highlight-color:transparent}
-.ltbtn svg{width:34px;height:70px;overflow:visible}
-.ltbtn .plate{fill:#1a1a1d;stroke:#2c2c30}
-.ltbtn .nut{fill:url(#nutg)}
-.ltbtn .lever{transform-origin:17px 35px;transition:transform .15s;transform:rotate(180deg)}
+/* Controls are simple outline drawings (dark: white lines, light: black lines) */
+.od,.lt,.k{display:flex;flex-direction:column;align-items:center;gap:8px}
+.od>span,.lt>span,.k span{font:700 12px/14px system-ui,sans-serif;letter-spacing:.14em;color:var(--ink)}
+/* Overdrive: lamp above a round footswitch */
+.odbtn,.ltbtn{border:0;padding:0;background:none;cursor:pointer;display:block;-webkit-tap-highlight-color:transparent}
+.odbtn svg{display:block;width:56px;height:96px;overflow:visible}
+.odbtn .lamp{fill:none;stroke:var(--ink);stroke-width:1.6;transition:fill .15s}
+.odbtn.on .lamp{fill:#e0312a;stroke:#e0312a;filter:drop-shadow(0 0 5px #e0312a)}
+:root[data-mode=light] .odbtn.on .lamp{fill:#c40000;stroke:#c40000;filter:none}
+.odbtn .ol{fill:none;stroke:var(--ink)}
+.odbtn:active svg{transform:scale(.96)}
+/* Light switch: lever down = dark, lever up = light */
+.ltbtn svg{display:block;width:40px;height:96px;overflow:visible}
+.ltbtn .ol{fill:none;stroke:var(--ink)}
+.ltbtn .lever{transform-origin:20px 54px;transition:transform .15s;transform:rotate(180deg)}
 .ltbtn.on .lever{transform:rotate(0deg)}
-.ltbtn .stick{stroke:#cfcfd4;stroke-width:5;stroke-linecap:round}
-.ltbtn .tip{fill:#e9e9ec}
-.ltbtn:focus-visible{outline:2px solid var(--ink);outline-offset:2px;border-radius:8px}
-:root[data-mode=light] .ltbtn .plate{fill:#d9d6ce;stroke:#b5b2a8}
-:root[data-mode=light] .ltbtn .stick{stroke:#6a6a70}
-:root[data-mode=light] .ltbtn .tip{fill:#3a3a3f}
-.lt>span{font:600 11px/13px Oswald,Impact,sans-serif;letter-spacing:.1em;color:var(--ink)}
-.k{display:flex;flex-direction:column;align-items:center;gap:8px}
+.ltbtn .stick{stroke:var(--ink);stroke-width:5;stroke-linecap:round}
+.ltbtn .tip{fill:var(--ink)}
+.odbtn:focus-visible,.ltbtn:focus-visible{outline:2px solid var(--ink);outline-offset:2px;border-radius:8px}
+.knobs>.right{justify-self:end;display:flex;align-items:flex-start;gap:10px}
 .k svg{display:block;width:96px;height:96px;touch-action:none;cursor:grab;outline:none;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
 .k.wide svg{width:154px}
-.k span{font:600 13px/1 Oswald,Impact,sans-serif;letter-spacing:.14em;color:var(--ink)}
-.scale text{font:500 9px system-ui,sans-serif;fill:var(--dim);letter-spacing:.02em}
-.k.wide .scale text{font-size:9.5px;letter-spacing:.08em;transition:opacity .2s}
+.scale text{font:600 9px system-ui,sans-serif;fill:var(--scale);letter-spacing:.04em}
+.k.wide .scale text{font-size:9px;letter-spacing:.06em;transition:opacity .2s}
 .scale text.off{opacity:.3}
-.cap{fill:url(#capg)}
-.ptr{stroke:#161616;stroke-width:3.5;stroke-linecap:round}
-.ring{fill:none;stroke:#222226;stroke-width:2}
+.cap{fill:var(--bg);stroke:var(--ink);stroke-width:1.6}
+.ptr{stroke:var(--ink);stroke-width:3;stroke-linecap:round}
+.ring{fill:none;stroke:var(--ink);stroke-width:2.5}
 .logo{display:block;width:96px;height:96px}
-.logo .ln{stroke:url(#logog);fill:none}
+.logo .ln{stroke:var(--logo);fill:none}
 
 /* Video: frameless. Shorts get the same height as a wide video, so nothing jumps */
 /* The stage keeps one fixed height for every video, so nothing moves when a knob turns.
@@ -127,9 +117,9 @@ footer{width:100%;max-width:880px;margin:48px auto 0;padding:24px 0 28px;border-
   .k svg{width:80px;height:80px}.k.wide svg{width:128px}
   .logo{width:56px;height:56px;margin-top:12px}
   .knobs>.left{gap:4px}
-  .odbtn{width:52px;height:80px;gap:10px}.odbtn .sw{width:32px;height:32px}
-  .od>span,.lt>span{font-size:10px;letter-spacing:.06em}
-  .k.wide svg{width:118px}.knobs>.right{gap:0}.ltbtn{width:38px;height:80px}.ltbtn svg{width:28px;height:58px}
+  .odbtn svg{width:46px;height:80px}
+  .od>span,.lt>span,.k span{font-size:10px;letter-spacing:.06em}
+  .k.wide svg{width:118px}.knobs>.right{gap:0}.ltbtn svg{width:32px;height:80px}
   /* Phone: video goes edge to edge */
   .stage{margin:0 -12px;height:min(58vh,calc(100vw * 1.05));height:min(58svh,calc(100cqw * 1.05))}
   .frame{border-radius:0;box-shadow:none}
@@ -138,28 +128,27 @@ footer{width:100%;max-width:880px;margin:48px auto 0;padding:24px 0 28px;border-
 }
 @media(max-width:380px){
   .k svg{width:72px;height:72px}.k.wide svg{width:116px}
-  .odbtn{width:46px;height:72px}.odbtn .sw{width:28px;height:28px}
+  .odbtn svg{width:42px;height:72px}
   .logo{width:46px;height:46px}
   .od>span,.lt>span{font-size:9.5px;letter-spacing:.03em}
-  .k.wide svg{width:104px}.ltbtn{width:34px;height:72px}.ltbtn svg{width:24px;height:50px}
+  .k.wide svg{width:104px}.ltbtn svg{width:30px;height:72px}
   .knobs>.left{gap:0}
 }
 @media(max-width:340px){
   .k svg{width:62px;height:62px}.k.wide svg{width:92px}.logo{width:36px;height:36px}
-  .odbtn{width:40px;height:62px}.odbtn .sw{width:24px;height:24px}.ltbtn{height:62px}
+  .odbtn svg{width:36px;height:62px}.ltbtn svg{width:26px;height:62px}
   .od>span,.lt>span,.k span{font-size:9px}
 }
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 @media(forced-colors:active){
-  .cap{fill:Canvas;stroke:CanvasText;stroke-width:2}.ptr{stroke:Highlight}.ring{stroke:CanvasText!important}
+  .cap{fill:Canvas!important;stroke:CanvasText!important;stroke-width:2}.ptr{stroke:Highlight}.ring{stroke:CanvasText!important}
   .scale text{fill:CanvasText}.scale text.off{fill:GrayText}.frame{border:1px solid CanvasText}
-  .logo .ln{stroke:CanvasText}
+  .logo .ln{stroke:CanvasText!important}
   .poster .btn{border:2px solid CanvasText;background:Canvas}.poster .btn path{fill:CanvasText}
   .cover:focus-visible{outline-color:Highlight}
-  .odbtn .sw{background:Canvas;border:2px solid ButtonText;box-shadow:none}.odbtn .led{forced-color-adjust:none;background:Canvas;border:1px solid CanvasText;box-shadow:none}
-  .odbtn.on .led{background:Highlight;border-color:Highlight}.odbtn:focus-visible{outline-color:Highlight}
-  .ltbtn .plate{fill:Canvas!important;stroke:ButtonText!important}.ltbtn .nut{fill:Canvas!important;stroke:ButtonText}.ltbtn .stick{stroke:ButtonText!important}.ltbtn .tip{fill:ButtonText!important}.ltbtn.on .stick{stroke:Highlight!important}.ltbtn.on .tip{fill:Highlight!important}
-  .odbtn .led{background:Canvas!important}.odbtn.on .led{background:Highlight!important}.ltbtn:focus-visible{outline-color:Highlight}
+  .odbtn .ol,.ltbtn .ol{stroke:ButtonText!important}.odbtn .lamp{stroke:ButtonText!important;fill:Canvas!important;filter:none!important}.odbtn.on .lamp{fill:Highlight!important;stroke:Highlight!important}
+  .odbtn:focus-visible{outline-color:Highlight}
+  .ltbtn .stick{stroke:ButtonText!important}.ltbtn .tip{fill:ButtonText!important}.ltbtn.on .stick{stroke:Highlight!important}.ltbtn.on .tip{fill:Highlight!important}.ltbtn:focus-visible{outline-color:Highlight}
   .wm .ln{stroke:CanvasText}.bar{background:Canvas;border-top:1px solid CanvasText}.pp{color:ButtonText;border:1px solid ButtonText}
   .rail{background:GrayText}.fill,.fill::after{background:Highlight}.pp:focus-visible,.track:focus-visible{outline-color:Highlight}
   footer{border-top-color:CanvasText}.social a{color:LinkText}.social a:focus-visible{outline-color:Highlight}
@@ -206,8 +195,6 @@ footer{width:100%;max-width:880px;margin:48px auto 0;padding:24px 0 28px;border-
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
   <linearGradient id="logog" gradientUnits="userSpaceOnUse" x1="0" y1="84" x2="0" y2="256"><stop offset="0" stop-color="#990000"/><stop offset=".72" stop-color="#3a0000"/><stop offset="1" stop-color="#370000"/></linearGradient>
-  <radialGradient id="nutg" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#e4e4e8"/><stop offset=".6" stop-color="#8e8e95"/><stop offset="1" stop-color="#4a4a50"/></radialGradient>
-  <radialGradient id="capg" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#fbf6e7"/><stop offset=".7" stop-color="#d9d0b8"/><stop offset="1" stop-color="#9c9480"/></radialGradient>
 </defs></svg>
 
 <script>
@@ -228,6 +215,9 @@ const LIBRARY=[
   {label:"GUITAR", name:"Guitar Only",
     clean:["74Fn6fPGEnE","quwbFH3pn8A"],
     overdrive:[]},
+  {label:"DRUMS",  name:"Drums",
+    clean:[],          /* coming soon: add drum videos here, lightest first */
+    overdrive:[]},
   {label:"SONGS",  name:"Full Songs",
     clean:["2iNbePz8Ao0","n-DhYip3wh8",{id:"i6rgYLaGDbg",shape:"upright"},"tCl8g3aSStY","ZwpYgKk2IPk","ggS8HsNWE3s","73ziziUBd6U"],
     overdrive:["uso0dnW1UiI","x3fvDBi8R0g"]}
@@ -244,14 +234,16 @@ const knobs=[
   {id:"gain",label:"GAIN",v:0,steps:0},
   {id:"type",label:"TYPE",v:0,steps:types.length}
 ];
-const A0=-135,A1=135,S0=-55,S1=55;
+const A0=-135,A1=135;
+/* Type labels spread wider when there are more of them */
+const TA={2:[-40,40],3:[-55,0,55],4:[-80,-30,30,80],5:[-90,-48,0,48,90]}[types.length]||types.map((t,i)=>-90+i*180/(types.length-1));
 const get=id=>knobs.find(k=>k.id===id);
-const ang=k=>k.steps?S0+k.v/(k.steps-1)*(S1-S0):A0+k.v/10*(A1-A0);
+const ang=k=>k.steps?TA[k.v]:A0+k.v/10*(A1-A0);
 
 function scale(k){
   const n=k.steps||11,out=[];
   for(let i=0;i<n;i++){
-    const a=((k.steps?S0+i/(n-1)*(S1-S0):A0+i/(n-1)*(A1-A0))-90)*Math.PI/180,r=44;
+    const a=((k.steps?TA[i]:A0+i/(n-1)*(A1-A0))-90)*Math.PI/180,r=k.steps?46:44;
     const anchor=k.steps?(i===0?"end":i===n-1?"start":"middle"):"middle";
     out.push(`<text class="${k.steps?'p'+i:''}" x="${50+r*Math.cos(a)}" y="${50+r*Math.sin(a)+3}" text-anchor="${anchor}">${k.steps?types[i].label:i}</text>`);
   }
@@ -262,13 +254,13 @@ const knobHtml=k=>`
   <svg viewBox="${k.steps?'-30 0 160 100':'0 0 100 100'}" id="k-${k.id}" tabindex="0" role="slider" aria-label="${k.label}">
    <g class="scale">${scale(k)}</g>
    <circle class="ring" cx="50" cy="50" r="33"/>
-   <g class="rot"><circle class="cap" cx="50" cy="50" r="28"/><line class="ptr" x1="50" y1="50" x2="50" y2="26"/></g>
+   <g class="rot"><circle class="cap" cx="50" cy="50" r="27"/><line class="ptr" x1="50" y1="50" x2="50" y2="27"/></g>
   </svg>
   <span>${k.label}</span>
  </div>`;
-const odHtml=`<div class="od"><button id="odBtn" class="odbtn" aria-pressed="false" aria-label="Overdrive"><span class="led" aria-hidden="true"></span><span class="sw" aria-hidden="true"></span></button><span>OVERDRIVE</span></div>`;
-const ltHtml=`<div class="lt"><button id="ltBtn" class="ltbtn" aria-pressed="false" aria-label="Light version"><svg viewBox="0 0 34 70" aria-hidden="true"><rect class="plate" x="3" y="16" width="28" height="38" rx="6"/><circle class="nut" cx="17" cy="35" r="9"/><g class="lever"><line class="stick" x1="17" y1="35" x2="17" y2="8"/><circle class="tip" cx="17" cy="7" r="5"/></g></svg></button><span>LIGHT</span></div>`;
-document.getElementById('knobs').innerHTML=`<div class="left">${knobHtml(knobs[0])}${odHtml}</div>`+document.getElementById('logoTpl').innerHTML+`<div class="right">${knobHtml(knobs[1])}${ltHtml}</div>`;
+const odHtml=`<div class="od"><button id="odBtn" class="odbtn" aria-pressed="false" aria-label="Overdrive"><svg viewBox="0 0 56 96" aria-hidden="true"><circle class="lamp" cx="28" cy="26" r="5"/><circle class="ol" cx="28" cy="60" r="17" stroke-width="2.5"/><circle class="ol" cx="28" cy="60" r="11" stroke-width="1.4"/></svg></button><span>OVERDRIVE</span></div>`;
+const ltHtml=`<div class="lt"><button id="ltBtn" class="ltbtn" aria-pressed="false" aria-label="Light version"><svg viewBox="0 0 40 96" aria-hidden="true"><rect class="ol" x="5" y="34" width="30" height="40" rx="6" stroke-width="2"/><circle class="ol" cx="20" cy="54" r="7" stroke-width="1.6"/><g class="lever"><line class="stick" x1="20" y1="54" x2="20" y2="26"/><circle class="tip" cx="20" cy="25" r="5"/></g></svg></button><span>LIGHT</span></div>`;
+document.getElementById('knobs').innerHTML=`<div class="left">${knobHtml(knobs[0])}${odHtml}</div>`+document.getElementById('logoTpl').innerHTML+`<div class="right">${ltHtml}${knobHtml(knobs[1])}</div>`;
 /* Light switch: remembers the choice on this device */
 const ltBtn=document.getElementById('ltBtn');
 function setMode(light){
