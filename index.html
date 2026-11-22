@@ -9,8 +9,8 @@
 <style>
 /* Dark, tidy amp face: one column, knobs and logo on one line, video below at the same width */
 :root{color-scheme:dark;--bg:#0b0b0c;--ink:#ece9e1;--dim:#8f8c85;--line:#1d1d20;
-  --w:min(100%,880px,calc((100svh - 345px) * 16 / 9))}
-@supports not (height:1svh){:root{--w:min(100%,880px,calc((100vh - 345px) * 16 / 9))}}
+  --w:min(100%,880px,calc((100svh - 385px) * 16 / 9))}
+@supports not (height:1svh){:root{--w:min(100%,880px,calc((100vh - 385px) * 16 / 9))}}
 *{box-sizing:border-box;min-width:0}
 html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,sans-serif;overflow-x:clip}
 .page{min-height:100vh;min-height:100svh;display:flex;flex-direction:column;padding:32px max(4vw,16px) 0}
@@ -40,13 +40,37 @@ html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui
 .frame{position:relative;overflow:hidden;background:#000;border-radius:8px;aspect-ratio:16/9;width:100%;
   box-shadow:0 0 0 1px var(--line),0 16px 40px -24px #000}
 .frame.short{aspect-ratio:9/16;width:auto;height:86%}
-.frame>div,.frame iframe{position:absolute;left:0;width:100%;border:0}
+#player,.frame iframe{position:absolute;left:0;width:100%;border:0}
 /* Trick: the player is 3 times taller than the box. The video sits in the middle third,
    while YouTube's title bar (top) and logo (bottom) fall outside the box and are cut off. */
-.frame>div,.frame iframe{top:-100%;height:300%;pointer-events:none}
+#player,.frame iframe{top:-100%;height:300%;pointer-events:none}
 .frame.direct iframe{pointer-events:auto}
 .frame iframe#plain{top:0;height:100%;pointer-events:auto;z-index:2}
 .frame iframe#plain.hidden{display:none}
+.cover{z-index:3}.poster.paused{background:none!important}.poster.paused::after{display:none}
+
+/* Watermark: the logo in the corner of every video */
+.wm{position:absolute;z-index:4;right:14px;bottom:48px;width:34px;height:34px;pointer-events:none;opacity:.9}
+.wm .ln{stroke:url(#logog);fill:none}
+.frame.short .wm{width:28px;height:28px;right:10px}
+
+/* Own control bar: play/pause and progress */
+.bar{position:absolute;z-index:5;left:0;right:0;bottom:0;display:flex;align-items:center;gap:6px;padding:0 10px 2px 4px;height:44px;
+  background:linear-gradient(#0000,#000b)}
+.pp{width:40px;height:40px;flex:none;border:0;background:none;color:#fff;display:grid;place-items:center;cursor:pointer;border-radius:50%;-webkit-tap-highlight-color:transparent}
+.pp path{fill:currentColor}
+.track{flex:1;height:32px;display:flex;align-items:center;cursor:pointer;touch-action:none;-webkit-tap-highlight-color:transparent}
+.rail{position:relative;width:100%;height:3px;border-radius:2px;background:#ffffff38}
+.fill{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:2px;background:#ece9e1}
+.fill::after{content:"";position:absolute;right:-6px;top:50%;width:12px;height:12px;margin-top:-6px;border-radius:50%;background:#ece9e1;transform:scale(0);transition:transform .12s}
+.track:hover .fill::after,.track.drag .fill::after,.track:focus-visible .fill::after{transform:scale(1)}
+.pp:focus-visible,.track:focus-visible{outline:2px solid #ece9e1;outline-offset:2px}
+.frame.plainmode .bar{display:none}
+
+/* Temporary link line */
+.linkline{margin:14px 0 0;text-align:center;font-size:13px;color:var(--dim);overflow-wrap:anywhere}
+.linkline a{color:var(--ink)}
+.linkline button{margin-left:6px;min-height:32px;padding:0 12px;border:1px solid #3a3a3f;border-radius:16px;background:none;color:var(--ink);font:inherit;cursor:pointer}
 .cover{position:absolute;inset:0;border:0;padding:0;margin:0;background:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .poster{position:absolute;inset:0;background:#000 center/cover no-repeat;display:grid;place-items:center}
 .poster::after{content:"";position:absolute;inset:0;background:linear-gradient(#0000 55%,#0006)}
@@ -56,6 +80,30 @@ html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui
 .cover:hover .btn,.cover:focus-visible .btn{transform:scale(1.06);background:#0b0b0ce6}
 .cover:focus-visible{outline:2px solid var(--ink);outline-offset:-2px}
 .hidden{display:none}
+.cover{z-index:3}.poster.paused{background:none!important}.poster.paused::after{display:none}
+
+/* Watermark: the logo in the corner of every video */
+.wm{position:absolute;z-index:4;right:14px;bottom:48px;width:34px;height:34px;pointer-events:none;opacity:.9}
+.wm .ln{stroke:url(#logog);fill:none}
+.frame.short .wm{width:28px;height:28px;right:10px}
+
+/* Own control bar: play/pause and progress */
+.bar{position:absolute;z-index:5;left:0;right:0;bottom:0;display:flex;align-items:center;gap:6px;padding:0 10px 2px 4px;height:44px;
+  background:linear-gradient(#0000,#000b)}
+.pp{width:40px;height:40px;flex:none;border:0;background:none;color:#fff;display:grid;place-items:center;cursor:pointer;border-radius:50%;-webkit-tap-highlight-color:transparent}
+.pp path{fill:currentColor}
+.track{flex:1;height:32px;display:flex;align-items:center;cursor:pointer;touch-action:none;-webkit-tap-highlight-color:transparent}
+.rail{position:relative;width:100%;height:3px;border-radius:2px;background:#ffffff38}
+.fill{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:2px;background:#ece9e1}
+.fill::after{content:"";position:absolute;right:-6px;top:50%;width:12px;height:12px;margin-top:-6px;border-radius:50%;background:#ece9e1;transform:scale(0);transition:transform .12s}
+.track:hover .fill::after,.track.drag .fill::after,.track:focus-visible .fill::after{transform:scale(1)}
+.pp:focus-visible,.track:focus-visible{outline:2px solid #ece9e1;outline-offset:2px}
+.frame.plainmode .bar{display:none}
+
+/* Temporary link line */
+.linkline{margin:14px 0 0;text-align:center;font-size:13px;color:var(--dim);overflow-wrap:anywhere}
+.linkline a{color:var(--ink)}
+.linkline button{margin-left:6px;min-height:32px;padding:0 12px;border:1px solid #3a3a3f;border-radius:16px;background:none;color:var(--ink);font:inherit;cursor:pointer}
 
 /* Footer */
 footer{width:100%;max-width:880px;margin:48px auto 0;padding:24px 0 28px;border-top:1px solid var(--line)}
@@ -85,6 +133,9 @@ footer{width:100%;max-width:880px;margin:48px auto 0;padding:24px 0 28px;border-
   .logo .ln{stroke:CanvasText}
   .poster .btn{border:2px solid CanvasText;background:Canvas}.poster .btn path{fill:CanvasText}
   .cover:focus-visible{outline-color:Highlight}
+  .wm .ln{stroke:CanvasText}.bar{background:Canvas;border-top:1px solid CanvasText}.pp{color:ButtonText;border:1px solid ButtonText}
+  .rail{background:GrayText}.fill,.fill::after{background:Highlight}.pp:focus-visible,.track:focus-visible{outline-color:Highlight}
+  .linkline a{color:LinkText}.linkline button{color:ButtonText;border-color:ButtonText}
   footer{border-top-color:CanvasText}.social a{color:LinkText}.social a:focus-visible{outline-color:Highlight}
 }
 </style>
@@ -110,8 +161,15 @@ footer{width:100%;max-width:880px;margin:48px auto 0;padding:24px 0 28px;border-
       <button class="cover" id="cover" aria-label="Play video">
         <span class="poster" id="poster"><span class="btn"><svg width="26" height="26" viewBox="0 0 22 22" aria-hidden="true"><path d="M7 4l12 7-12 7z" fill="#fff"/></svg></span></span>
       </button>
+      <svg class="wm" viewBox="100 80 185 180" aria-hidden="true"><g class="ln" stroke-width="6"><line x1="109.5" y1="84" x2="109.5" y2="256"/><line x1="192" y1="84" x2="192" y2="256"/><line x1="274" y1="84" x2="274" y2="256"/><line x1="151" y1="167" x2="151" y2="256"/><line x1="148" y1="169.5" x2="233.5" y2="169.5" stroke-width="5"/></g></svg>
+      <div class="bar" id="bar">
+        <button class="pp" id="pp" aria-label="Play"><svg width="18" height="18" viewBox="0 0 22 22" aria-hidden="true"><path id="ppIcon" d="M6 3l14 8-14 8z"/></svg></button>
+        <div class="track" id="track" tabindex="0" role="slider" aria-label="Video position" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="rail"><div class="fill" id="fill"></div></div></div>
+      </div>
     </div>
   </div>
+  <!-- TEMPORARY: link of the video on screen, so wrong shapes can be reported. Remove when done. -->
+  <p class="linkline">Video link: <a id="vlink" href="#" target="_blank" rel="noopener"></a> <button id="copy" type="button">Copy</button></p>
 </div>
 <footer>
   <ul class="social">
@@ -131,7 +189,7 @@ footer{width:100%;max-width:880px;margin:48px auto 0;padding:24px 0 28px;border-
 {
 /* Each type lists its videos from the lightest to the heaviest.
    Gain 0 shows the first (lightest), gain 10 the last (heaviest).
-   s:1 marks a Short (upright video). */
+   s:1 marks a /shorts/ link (first guess). f:true or f:false sets the shape by hand (upright or wide). */
 const types=[
   {label:"LIGHT",name:"Light and Instrumental",v:[{id:"im13LzBOD_w"},{id:"DEANSHDWww0"},{id:"AG3WGAEKPGY"},{id:"6VrBtL-pBQk"}]},
   {label:"GUITAR",name:"Guitar Only",v:[{id:"74Fn6fPGEnE"},{id:"quwbFH3pn8A"}]},
@@ -169,10 +227,30 @@ document.getElementById('knobs').innerHTML=knobHtml(knobs[0])+document.getElemen
 const frame=document.getElementById('frame'),cover=document.getElementById('cover'),poster=document.getElementById('poster');
 let yt=null,ready=false,playing=false,current=null,fallback=0;
 
+const pp=document.getElementById('pp'),ppIcon=document.getElementById('ppIcon'),track=document.getElementById('track'),fill=document.getElementById('fill');
+const PLAY="M6 3l14 8-14 8z",PAUSE="M5 3h4v16H5zM13 3h4v16h-4z";
+let started=false;
+/* on: show the play button. Before the first play it sits on the thumbnail; after that, on the paused picture. */
 function showPoster(on){
   poster.classList.toggle('hidden',!on);
+  poster.classList.toggle('paused',on&&started);
   cover.setAttribute('aria-label',on?'Play video':'Pause video');
+  ppIcon.setAttribute('d',on?PLAY:PAUSE);pp.setAttribute('aria-label',on?'Play':'Pause');
 }
+function thumb(v){return `url(https://i.ytimg.com/vi/${v.id}/${upright(v)?'oardefault':'hqdefault'}.jpg)`}
+function setFill(f){fill.style.width=(f*100)+'%';track.setAttribute('aria-valuenow',Math.round(f*100))}
+/* Shape check: YouTube keeps an "original shape" thumbnail (oardefault) for upright videos.
+   If it exists and is taller than wide, the video is upright. If it is missing or wide, the video is wide.
+   Until the check is done, the link type (/shorts/ or not) is used as a first guess. */
+function upright(v){return v.f!==undefined?v.f:v.up===undefined?!!v.s:v.up}
+for(const t of types)for(const v of t.v){
+  const img=new Image();
+  const done=()=>{if(v===current){frame.classList.toggle('short',v.up);poster.style.backgroundImage=thumb(v)}};
+  img.onload=()=>{v.up=v.f!==undefined?v.f:img.naturalHeight>img.naturalWidth*1.1;done()};
+  img.onerror=()=>{v.up=v.f!==undefined?v.f:false;done()};
+  img.src=`https://i.ytimg.com/vi/${v.id}/oardefault.jpg`;
+}
+
 /* Backup: if the clean player cannot show a video, use YouTube's normal player for it */
 const plain=document.getElementById('plain');
 let apiFailed=false;
@@ -181,31 +259,58 @@ setTimeout(()=>{if(!ready){apiFailed=true;plainPlayer()}},6000);
 function plainPlayer(){
   if(!current)return;
   plain.src=`https://www.youtube.com/embed/${current.id}?rel=0&playsinline=1`;
-  plain.classList.remove('hidden');cover.classList.add('hidden');
+  plain.classList.remove('hidden');cover.classList.add('hidden');frame.classList.add('plainmode');
 }
 function load(vid){
-  current=vid;playing=false;frame.classList.remove('direct');
+  current=vid;playing=false;started=false;setFill(0);frame.classList.remove('direct','plainmode');
+  const l=`https://youtu.be/${vid.id}`;vlink.href=l;vlink.textContent=l;
   plain.classList.add('hidden');plain.removeAttribute('src');
-  if(apiFailed){frame.classList.toggle('short',!!vid.s);plainPlayer();return}
-  frame.classList.toggle('short',!!vid.s);
-  poster.style.backgroundImage=`url(https://i.ytimg.com/vi/${vid.id}/hqdefault.jpg)`;
+  if(apiFailed){frame.classList.toggle('short',upright(vid));plainPlayer();return}
+  frame.classList.toggle('short',upright(vid));
+  poster.style.backgroundImage=thumb(vid);
   cover.classList.remove('hidden');showPoster(true);
   if(ready)yt.cueVideoById(vid.id);
 }
-cover.addEventListener('click',()=>{
+function toggle(){
   if(!current)return;
   if(!ready){plainPlayer();return}
   if(playing){yt.pauseVideo();return}
   yt.playVideo();showPoster(false);
   /* If the phone refuses to start, hand the tap over to YouTube's own player */
   clearTimeout(fallback);
-  fallback=setTimeout(()=>{if(!playing){cover.classList.add('hidden');frame.classList.add('direct')}},1500);
+  fallback=setTimeout(()=>{if(!playing){cover.classList.add('hidden');frame.classList.add('direct','plainmode')}},1500);
+}
+cover.addEventListener('click',toggle);pp.addEventListener('click',toggle);
+
+/* Progress bar: tap or drag to jump, arrow keys move 5 seconds */
+let dragging=false;
+function seekAt(x){
+  if(!ready)return;const r=track.getBoundingClientRect(),d=yt.getDuration();if(!(d>0))return;
+  const f=Math.max(0,Math.min(1,(x-r.left)/r.width));setFill(f);yt.seekTo(f*d,true);
+}
+track.addEventListener('pointerdown',e=>{e.preventDefault();dragging=true;track.classList.add('drag');track.setPointerCapture(e.pointerId);seekAt(e.clientX)});
+track.addEventListener('pointermove',e=>{if(dragging)seekAt(e.clientX)});
+const endDrag=()=>{dragging=false;track.classList.remove('drag')};
+track.addEventListener('pointerup',endDrag);track.addEventListener('pointercancel',endDrag);
+track.addEventListener('keydown',e=>{
+  if(!ready)return;const d=yt.getDuration();if(!(d>0))return;
+  const step=e.key==="ArrowRight"?5:e.key==="ArrowLeft"?-5:0;if(!step)return;
+  e.preventDefault();const t=Math.max(0,Math.min(d-1,yt.getCurrentTime()+step));yt.seekTo(t,true);setFill(t/d);
+});
+
+/* TEMPORARY: copy the link of the video on screen */
+const vlink=document.getElementById('vlink'),copyBtn=document.getElementById('copy');
+copyBtn.addEventListener('click',async()=>{
+  try{await navigator.clipboard.writeText(vlink.href);copyBtn.textContent='Copied'}
+  catch(e){const r=document.createRange();r.selectNodeContents(vlink);const sel=getSelection();sel.removeAllRanges();sel.addRange(r);copyBtn.textContent='Selected'}
+  setTimeout(()=>copyBtn.textContent='Copy',1500);
 });
 /* Stop just before the end, so YouTube's end screen and suggestions never appear */
 setInterval(()=>{
   if(!ready||!playing)return;
   const d=yt.getDuration(),t=yt.getCurrentTime();
-  if(d>0&&d-t<0.4){yt.pauseVideo();yt.seekTo(0,true);playing=false;showPoster(true)}
+  if(d>0&&!dragging)setFill(t/d);
+  if(d>0&&d-t<0.4){yt.pauseVideo();yt.seekTo(0,true);playing=false;started=false;setFill(0);showPoster(true)}
 },200);
 window.onYouTubeIframeAPIReady=()=>{
   yt=new YT.Player('player',{
@@ -215,7 +320,7 @@ window.onYouTubeIframeAPIReady=()=>{
       onReady:()=>{ready=true;yt.unMute();if(current)yt.cueVideoById(current.id)},
       onError:()=>plainPlayer(),
       onStateChange:e=>{
-        if(e.data===1){playing=true;cover.classList.remove('hidden');showPoster(false)}
+        if(e.data===1){playing=true;started=true;cover.classList.remove('hidden');showPoster(false)}
         if(e.data===2||e.data===0){playing=false;showPoster(true)}
       }
     }
