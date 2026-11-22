@@ -10,10 +10,11 @@
 /* Dark, tidy amp face: one column, knobs and logo on one line, video below at the same width */
 :root{color-scheme:dark;--bg:#0b0b0c;--ink:#ece9e1;--dim:#8f8c85;--line:#1d1d20;
   --w:min(100%,880px,calc((100svh - 345px) * 16 / 9))}
+@supports not (height:1svh){:root{--w:min(100%,880px,calc((100vh - 345px) * 16 / 9))}}
 *{box-sizing:border-box;min-width:0}
 html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,sans-serif;overflow-x:clip}
-.page{min-height:100svh;display:flex;flex-direction:column;padding:32px max(4vw,16px) 0}
-.wrap{width:max(var(--w),min(100%,560px));margin:auto}
+.page{min-height:100vh;min-height:100svh;display:flex;flex-direction:column;padding:32px max(4vw,16px) 0}
+.wrap{width:max(var(--w),min(100%,560px));margin:auto;container-type:inline-size}
 
 /* Gain left, logo exactly centred, Type right */
 .knobs{display:grid;grid-template-columns:1fr auto 1fr;align-items:start;margin:0 auto 32px;max-width:520px}
@@ -32,15 +33,20 @@ html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui
 .logo .ln{stroke:url(#logog);fill:none}
 
 /* Video: frameless. Shorts get the same height as a wide video, so nothing jumps */
-.stage{display:flex;justify-content:center;container-type:inline-size}
+/* The stage keeps one fixed height for every video, so nothing moves when a knob turns.
+   Wide videos sit in its vertical centre, Shorts stand inside it. */
+.stage{display:flex;justify-content:center;align-items:center;
+  height:calc(min(100vw - 32px,880px) * 9 / 16);height:calc(100cqw * 9 / 16)}
 .frame{position:relative;overflow:hidden;background:#000;border-radius:8px;aspect-ratio:16/9;width:100%;
   box-shadow:0 0 0 1px var(--line),0 16px 40px -24px #000}
-.frame.short{aspect-ratio:9/16;width:auto;height:calc(100cqw * 9 / 16)}
+.frame.short{aspect-ratio:9/16;width:auto;height:86%}
 .frame>div,.frame iframe{position:absolute;left:0;width:100%;border:0}
 /* Trick: the player is 3 times taller than the box. The video sits in the middle third,
    while YouTube's title bar (top) and logo (bottom) fall outside the box and are cut off. */
 .frame>div,.frame iframe{top:-100%;height:300%;pointer-events:none}
 .frame.direct iframe{pointer-events:auto}
+.frame iframe#plain{top:0;height:100%;pointer-events:auto;z-index:2}
+.frame iframe#plain.hidden{display:none}
 .cover{position:absolute;inset:0;border:0;padding:0;margin:0;background:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .poster{position:absolute;inset:0;background:#000 center/cover no-repeat;display:grid;place-items:center}
 .poster::after{content:"";position:absolute;inset:0;background:linear-gradient(#0000 55%,#0006)}
@@ -67,9 +73,9 @@ footer{width:100%;max-width:880px;margin:48px auto 0;padding:24px 0 28px;border-
   .k svg{width:80px;height:80px}.k.wide svg{width:128px}
   .logo{width:72px;height:72px;margin-top:4px}
   /* Phone: video goes edge to edge */
-  .stage{margin:0 -12px}
+  .stage{margin:0 -12px;height:min(58vh,calc(100vw * 1.05));height:min(58svh,calc(100cqw * 1.05))}
   .frame{border-radius:0;box-shadow:none}
-  .frame.short{height:min(68svh,calc(100cqw * 16 / 9 * .78));border-radius:10px}
+  .frame.short{height:100%;border-radius:10px}
   .social{gap:4px 24px}
 }
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -100,6 +106,7 @@ footer{width:100%;max-width:880px;margin:48px auto 0;padding:24px 0 28px;border-
   <div class="stage">
     <div class="frame" id="frame">
       <div id="player"></div>
+      <iframe id="plain" class="hidden" title="Video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
       <button class="cover" id="cover" aria-label="Play video">
         <span class="poster" id="poster"><span class="btn"><svg width="26" height="26" viewBox="0 0 22 22" aria-hidden="true"><path d="M7 4l12 7-12 7z" fill="#fff"/></svg></span></span>
       </button>
@@ -166,15 +173,28 @@ function showPoster(on){
   poster.classList.toggle('hidden',!on);
   cover.setAttribute('aria-label',on?'Play video':'Pause video');
 }
+/* Backup: if the clean player cannot show a video, use YouTube's normal player for it */
+const plain=document.getElementById('plain');
+let apiFailed=false;
+/* If YouTube's player script never loads, show every video with the normal player */
+setTimeout(()=>{if(!ready){apiFailed=true;plainPlayer()}},6000);
+function plainPlayer(){
+  if(!current)return;
+  plain.src=`https://www.youtube.com/embed/${current.id}?rel=0&playsinline=1`;
+  plain.classList.remove('hidden');cover.classList.add('hidden');
+}
 function load(vid){
   current=vid;playing=false;frame.classList.remove('direct');
+  plain.classList.add('hidden');plain.removeAttribute('src');
+  if(apiFailed){frame.classList.toggle('short',!!vid.s);plainPlayer();return}
   frame.classList.toggle('short',!!vid.s);
   poster.style.backgroundImage=`url(https://i.ytimg.com/vi/${vid.id}/hqdefault.jpg)`;
   cover.classList.remove('hidden');showPoster(true);
   if(ready)yt.cueVideoById(vid.id);
 }
 cover.addEventListener('click',()=>{
-  if(!ready||!current)return;
+  if(!current)return;
+  if(!ready){plainPlayer();return}
   if(playing){yt.pauseVideo();return}
   yt.playVideo();showPoster(false);
   /* If the phone refuses to start, hand the tap over to YouTube's own player */
@@ -190,10 +210,10 @@ setInterval(()=>{
 window.onYouTubeIframeAPIReady=()=>{
   yt=new YT.Player('player',{
     videoId:current?current.id:"",
-    host:'https://www.youtube-nocookie.com',
-    playerVars:{controls:0,rel:0,iv_load_policy:3,playsinline:1,disablekb:1,fs:0,cc_load_policy:0,showinfo:0,modestbranding:1,autohide:1,origin:location.origin,widget_referrer:location.href},
+    playerVars:{controls:0,rel:0,iv_load_policy:3,playsinline:1,disablekb:1,fs:0,cc_load_policy:0},
     events:{
-      onReady:()=>{ready=true;yt.unMute()},
+      onReady:()=>{ready=true;yt.unMute();if(current)yt.cueVideoById(current.id)},
+      onError:()=>plainPlayer(),
       onStateChange:e=>{
         if(e.data===1){playing=true;cover.classList.remove('hidden');showPoster(false)}
         if(e.data===2||e.data===0){playing=false;showPoster(true)}
