@@ -9,14 +9,14 @@
 <style>
 /* Dark, tidy amp face: one column, knobs and logo on one line, video below at the same width */
 :root{color-scheme:dark;--bg:#0b0b0c;--ink:#ece9e1;--dim:#8f8c85;--line:#1d1d20;
-  --w:min(100%,calc((100svh - 190px) * 16 / 9))}
+  --w:min(100%,880px,calc((100svh - 345px) * 16 / 9))}
 *{box-sizing:border-box;min-width:0}
 html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,sans-serif;overflow-x:clip}
-.page{padding:24px max(4vw,16px) 40px}
-.wrap{width:max(var(--w),min(100%,720px));max-width:1160px;margin:0 auto}
+.page{min-height:100svh;display:flex;flex-direction:column;padding:32px max(4vw,16px) 0}
+.wrap{width:max(var(--w),min(100%,560px));margin:auto}
 
 /* Gain left, logo exactly centred, Type right */
-.knobs{display:grid;grid-template-columns:1fr auto 1fr;align-items:start;margin:0 auto 24px;max-width:560px}
+.knobs{display:grid;grid-template-columns:1fr auto 1fr;align-items:start;margin:0 auto 32px;max-width:520px}
 .knobs>.k:first-child{justify-self:start}
 .knobs>.k:last-child{justify-self:end}
 .k{display:flex;flex-direction:column;align-items:center;gap:8px}
@@ -31,11 +31,11 @@ html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui
 .logo{display:block;width:96px;height:96px}
 .logo .ln{stroke:url(#logog);fill:none}
 
-/* Video: frameless, as large as the screen allows */
-.stage{display:flex;justify-content:center}
+/* Video: frameless. Shorts get the same height as a wide video, so nothing jumps */
+.stage{display:flex;justify-content:center;container-type:inline-size}
 .frame{position:relative;overflow:hidden;background:#000;border-radius:8px;aspect-ratio:16/9;width:100%;
-  box-shadow:0 0 0 1px var(--line),0 24px 60px -20px #000}
-.frame.short{aspect-ratio:9/16;width:min(100%,calc((100svh - 190px) * 9 / 16))}
+  box-shadow:0 0 0 1px var(--line),0 16px 40px -24px #000}
+.frame.short{aspect-ratio:9/16;width:auto;height:calc(100cqw * 9 / 16)}
 .frame>div,.frame iframe{position:absolute;left:0;width:100%;border:0}
 /* Trick: the player is 3 times taller than the box. The video sits in the middle third,
    while YouTube's title bar (top) and logo (bottom) fall outside the box and are cut off. */
@@ -51,15 +51,26 @@ html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui
 .cover:focus-visible{outline:2px solid var(--ink);outline-offset:-2px}
 .hidden{display:none}
 
+/* Footer */
+footer{width:100%;max-width:880px;margin:48px auto 0;padding:24px 0 28px;border-top:1px solid var(--line)}
+.social{list-style:none;margin:0;padding:0;display:flex;justify-content:center;flex-wrap:wrap;gap:8px 36px}
+.social a{display:inline-flex;align-items:center;min-height:44px;padding:0 4px;color:var(--dim);text-decoration:none;
+  font:600 13px/1 Oswald,Impact,sans-serif;letter-spacing:.16em;transition:color .15s}
+.social a:hover,.social a:focus-visible{color:var(--ink)}
+.social a:focus-visible{outline:2px solid var(--ink);outline-offset:2px;border-radius:2px}
+
 @media(max-width:600px){
-  .page{padding:16px 12px 24px}
-  .knobs{margin-bottom:16px;max-width:none}
+  .page{padding:20px 12px 0}
+  .wrap{margin:0 auto}
+  footer{margin-top:auto}
+  .knobs{margin-bottom:20px;max-width:none}
   .k svg{width:80px;height:80px}.k.wide svg{width:128px}
   .logo{width:72px;height:72px;margin-top:4px}
   /* Phone: video goes edge to edge */
   .stage{margin:0 -12px}
   .frame{border-radius:0;box-shadow:none}
-  .frame.short{width:min(100%,calc(100svh * 9 / 16))}
+  .frame.short{height:min(68svh,calc(100cqw * 16 / 9 * .78));border-radius:10px}
+  .social{gap:4px 24px}
 }
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 @media(forced-colors:active){
@@ -68,6 +79,7 @@ html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui
   .logo .ln{stroke:CanvasText}
   .poster .btn{border:2px solid CanvasText;background:Canvas}.poster .btn path{fill:CanvasText}
   .cover:focus-visible{outline-color:Highlight}
+  footer{border-top-color:CanvasText}.social a{color:LinkText}.social a:focus-visible{outline-color:Highlight}
 }
 </style>
 </head>
@@ -93,7 +105,15 @@ html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui
       </button>
     </div>
   </div>
-</div></div>
+</div>
+<footer>
+  <ul class="social">
+    <li><a href="https://www.instagram.com/paradoxognososynggrafikos/" target="_blank" rel="noopener">INSTAGRAM</a></li>
+    <li><a href="https://soundcloud.com/wojciech-hryniewicki/" target="_blank" rel="noopener">SOUNDCLOUD</a></li>
+    <li><a href="https://www.youtube.com/@wojciechhryniewicki" target="_blank" rel="noopener">YOUTUBE</a></li>
+  </ul>
+</footer>
+</div>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
   <linearGradient id="logog" gradientUnits="userSpaceOnUse" x1="0" y1="84" x2="0" y2="256"><stop offset="0" stop-color="#990000"/><stop offset=".72" stop-color="#3a0000"/><stop offset="1" stop-color="#370000"/></linearGradient>
