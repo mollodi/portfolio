@@ -150,7 +150,7 @@ footer{width:max(var(--w),min(100%,620px));margin:24px auto 0;padding:8px 0 10px
   .stage{flex:0 1 58vh;flex-basis:58svh;height:auto;min-height:calc(100vw * 9 / 16);margin:auto -12px;align-items:center}
   .frame{border-radius:0;box-shadow:none}
   .frame.short{height:100%;border-radius:10px}
-  .social{gap:0 20px}.social a{font-size:11px;letter-spacing:.1em}
+  .social{gap:0 14px}.social a{font-size:11px;letter-spacing:.08em}
 }
 @media(max-width:389px){
   .k svg{width:72px;height:72px}
@@ -158,6 +158,7 @@ footer{width:max(var(--w),min(100%,620px));margin:24px auto 0;padding:8px 0 10px
   .od>span,.lt>span{font-size:9.5px;letter-spacing:.03em}
   .ltbtn svg{width:30px;height:72px}
   .knobs>.right{gap:6px}
+  .social{gap:0 8px}.social a{font-size:10px;letter-spacing:.04em}
   .badge{width:40px;height:52px}
   .k.wide svg{width:104px}
   .knobs>.left{gap:0}
@@ -212,6 +213,7 @@ footer{width:max(var(--w),min(100%,620px));margin:24px auto 0;padding:8px 0 10px
   <ul class="social">
     <li><a href="https://www.instagram.com/paradoxognososynggrafikos/" target="_blank" rel="noopener">INSTAGRAM</a></li>
     <li><a href="https://soundcloud.com/wojciech-hryniewicki/" target="_blank" rel="noopener">SOUNDCLOUD</a></li>
+    <li><a href="https://open.spotify.com/album/3K6wsV0pec9utUBW2UuR88" target="_blank" rel="noopener">SPOTIFY</a></li>
     <li><a href="https://www.youtube.com/@wojciechhryniewicki" target="_blank" rel="noopener">YOUTUBE</a></li>
   </ul>
 </footer>
@@ -321,13 +323,15 @@ let yt=null,ready=false,playing=false,current=null,fallback=0;
 const logo=document.getElementById('logo'),lgPlay=document.getElementById('lgPlay'),lgFill=document.getElementById('lgFill'),lgProg=document.getElementById('lgProg'),lgSeek=document.getElementById('lgSeek'),lgVol=document.getElementById('lgVol'),lgVolZ=document.getElementById('lgVolZ');
 let started=false;
 /* on: the thumbnail covers the video (before playing and when paused), so YouTube's own buttons never show */
-let posterT=0;
+let reveal=false,revealFrom=null,revealT=0;
 function showPoster(on){
-  /* The thumbnail is lifted only after the video has played for 0.7 s, so YouTube's own
-     play/pause symbols (shown at start, on pause and when switching) are never seen */
-  clearTimeout(posterT);
-  if(on)poster.classList.remove('hidden');
-  else posterT=setTimeout(()=>{if(playing)poster.classList.add('hidden')},700);
+  /* The thumbnail stays on until the video has really played 1.5 seconds (measured on the video's
+     own clock, not from the moment it says "playing"), so YouTube's own play/pause symbol,
+     which it flashes when playback starts, is never seen. It comes back the instant you pause. */
+  clearTimeout(revealT);
+  if(on){poster.classList.remove('hidden');reveal=false}
+  else{reveal=true;revealFrom=null;
+    revealT=setTimeout(()=>{if(playing&&reveal){poster.classList.add('hidden');reveal=false}},4000)}  /* safety net */
   cover.setAttribute('aria-label',on?'Play video':'Pause video');
   logo.classList.toggle('playing',!on);lgPlay.setAttribute('aria-label',on?'Play':'Pause');
   showCtrls();
@@ -444,6 +448,10 @@ setInterval(()=>{
   if(!ready||!playing)return;
   const d=yt.getDuration(),t=yt.getCurrentTime();
   if(d>0&&!dragging)setFill(t/d);
+  if(reveal){
+    if(revealFrom===null)revealFrom=t;
+    if(t-revealFrom>=1.5){poster.classList.add('hidden');reveal=false;clearTimeout(revealT)}
+  }
   if(d>0&&d-t<0.4){yt.pauseVideo();yt.seekTo(0,true);playing=false;started=false;setFill(0);showPoster(true)}
 },200);
 window.onYouTubeIframeAPIReady=()=>{
